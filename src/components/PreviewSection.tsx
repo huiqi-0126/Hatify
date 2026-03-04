@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Type, Image as ImageIcon, CheckCircle2, Wand2, ArrowRight, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +9,7 @@ import { Hat3DView } from "./Hat3DView";
 
 export default function PreviewSection() {
   const { t } = useTranslation();
+  const constraintsRef = useRef(null);
   const [text, setText] = useState("Hatify");
   const [includeText, setIncludeText] = useState(true);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
@@ -124,6 +125,7 @@ export default function PreviewSection() {
                 />
               ) : (
                 <motion.div
+                  ref={constraintsRef}
                   initial={{ opacity: 0, scale: 0.95 }}
                   whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
@@ -148,11 +150,18 @@ export default function PreviewSection() {
 
                   {/* The Text Preview */}
                   {includeText && (
-                    <div
-                      className={`relative z-10 text-xl sm:text-2xl tracking-tight text-center px-8 break-words w-full ${selections.font} ${getTextColor(selections.stitchingColor)} drop-shadow-sm`}
+                    <motion.div
+                      drag
+                      dragConstraints={constraintsRef}
+                      dragElastic={0}
+                      dragMomentum={false}
+                      whileHover={{ outline: "1px dashed rgba(16, 185, 129, 0.5)", outlineOffset: "4px" }}
+                      whileTap={{ outline: "2px solid #10b981", outlineOffset: "4px", cursor: "grabbing" }}
+                      className={`relative z-20 px-4 py-2 cursor-grab break-words text-center select-none ${selections.font} ${getTextColor(selections.stitchingColor)} drop-shadow-sm`}
+                      style={{ touchAction: 'none' }}
                     >
                       {text || t('preview.yourText')}
-                    </div>
+                    </motion.div>
                   )}
 
                   {/* Realistic texture overlay */}
