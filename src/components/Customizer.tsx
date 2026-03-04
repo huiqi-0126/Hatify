@@ -33,12 +33,12 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
   };
 
   const colors = [
-    { name: 'Black', class: 'bg-zinc-900' },
-    { name: 'White', class: 'bg-white border border-zinc-200' },
-    { name: 'Emerald', class: 'bg-emerald-600' },
-    { name: 'Navy', class: 'bg-slate-800' },
-    { name: 'Red', class: 'bg-rose-600' },
-    { name: 'Khaki', class: 'bg-stone-400' },
+    { name: 'Black', hex: '#18181b' },
+    { name: 'White', hex: '#ffffff' },
+    { name: 'Emerald', hex: '#059669' },
+    { name: 'Navy', hex: '#1e293b' },
+    { name: 'Red', hex: '#e11d48' },
+    { name: 'Khaki', hex: '#a8a29e' },
   ];
 
   const renderSection = (id: string, title: string, content: React.ReactNode) => (
@@ -90,24 +90,39 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
     </div>
   );
 
-  const renderColorOptions = (key: string, label: string) => (
-    <div className="mb-6 last:mb-0">
-      <label className="block text-sm font-medium text-zinc-700 mb-3">{label}</label>
-      <div className="flex flex-wrap gap-3">
-        {colors.map(c => (
-          <button
-            key={c.name}
-            onClick={() => updateSelection(key, c.class)}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-110 ${c.class} ${
-              selections[key as keyof typeof selections] === c.class ? 'ring-2 ring-offset-2 ring-emerald-500 scale-110' : ''
-            }`}
-            aria-label={c.name}
-          >
-            {selections[key as keyof typeof selections] === c.class && (
-              <CheckCircle2 className={`w-5 h-5 ${c.name === 'White' ? 'text-zinc-900' : 'text-white'}`} />
-            )}
-          </button>
-        ))}
+  const renderColorOptions = () => (
+    <div className="space-y-6">
+      <div>
+        <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.color') || 'Hat Color'}</label>
+        <div className="flex flex-wrap gap-3 items-center">
+          {colors.map(c => (
+            <button
+              key={c.name}
+              onClick={() => updateSelection('bodyColor', c.hex)}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-110 shadow-sm ${
+                selections.bodyColor === c.hex ? 'ring-2 ring-offset-2 ring-emerald-500 scale-110' : ''
+              }`}
+              style={{ backgroundColor: c.hex, border: c.name === 'White' ? '1px solid #e4e4e7' : 'none' }}
+              aria-label={c.name}
+            >
+              {selections.bodyColor === c.hex && (
+                <CheckCircle2 className={`w-5 h-5 ${c.name === 'White' ? 'text-zinc-900' : 'text-white'}`} />
+              )}
+            </button>
+          ))}
+          
+          <div className="relative group">
+            <input
+              type="color"
+              value={selections.bodyColor.startsWith('#') ? selections.bodyColor : '#ffffff'}
+              onChange={(e) => updateSelection('bodyColor', e.target.value)}
+              className="w-10 h-10 rounded-full overflow-hidden cursor-pointer border-2 border-white shadow-sm ring-1 ring-zinc-200"
+            />
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+              {t('customizer.customColor') || 'Custom'}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -116,17 +131,10 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
     <div className="max-w-3xl mx-auto">
       {renderSection('scenario', t('customizer.scenario'), renderGridOptions('scenario', 'scenarios'))}
       {renderSection('baseStyle', t('customizer.baseStyle'), renderGridOptions('baseStyle', 'styles'))}
-      {renderSection('material', t('customizer.material'), renderGridOptions('material', 'materials'))}
       
-      {renderSection('colors', t('customizer.colors'), (
-        <div>
-          {renderColorOptions('bodyColor', t('customizer.colorTypes.body'))}
-          {renderColorOptions('brimColor', t('customizer.colorTypes.brim'))}
-          {renderColorOptions('sweatbandColor', t('customizer.colorTypes.sweatband'))}
-          {renderColorOptions('stitchingColor', t('customizer.colorTypes.stitching'))}
-        </div>
-      ))}
+      {renderSection('colors', t('customizer.colors'), renderColorOptions())}
 
+      {renderSection('material', t('customizer.material'), renderGridOptions('material', 'materials'))}
       {renderSection('craft', t('customizer.craft'), renderGridOptions('craft', 'crafts'))}
       {renderSection('position', t('customizer.position'), renderGridOptions('position', 'positions'))}
       {renderSection('size', t('customizer.size'), renderGridOptions('size', 'sizes'))}
