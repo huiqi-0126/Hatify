@@ -50,7 +50,7 @@ export default function GallerySection() {
   // Split images into columns for masonry layout
   const columns = 4;
   const columnData: ImageItem[][] = Array.from({ length: columns }, () => []);
-  
+
   images.forEach((img, i) => {
     columnData[i % columns].push(img);
   });
@@ -103,7 +103,7 @@ export default function GallerySection() {
             ))}
             {/* Gradient overlay to fade out the bottom and indicate more content */}
             <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-zinc-50 to-transparent pointer-events-none flex items-end justify-center pb-8">
-              <a 
+              <a
                 href="https://ai.dreambrand.studio/explore/gallery?parent_id=54&title=Accessories"
                 target="_blank"
                 rel="noopener noreferrer"

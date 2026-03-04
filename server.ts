@@ -1,8 +1,13 @@
 import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import Database from "better-sqlite3";
 
 const db = new Database("inquiries.db");
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize DB
 db.exec(`
@@ -27,7 +32,7 @@ try {
 
 async function startServer() {
   const app = express();
-  const PORT = 3001;
+  const PORT = Number(process.env.PORT) || 3001;
 
   app.use(express.json());
 
@@ -61,16 +66,27 @@ async function startServer() {
 
   // Proxy route for dreambrand images to bypass CORS
   app.post("/api/dreambrand/images", async (req, res) => {
+    console.log(`[Proxy] Incoming request for /api/dreambrand/images`);
     try {
       const response = await fetch('https://ai.dreambrand.studio/api/global/images', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': req.headers['user-agent'] || 'Mozilla/5.0',
+          'Origin': 'https://ai.dreambrand.studio',
+          'Referer': 'https://ai.dreambrand.studio/'
+        },
         body: JSON.stringify(req.body)
       });
+
+      if (!response.ok) {
+        console.error(`[Proxy] Remote server returned ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
       res.json(data);
     } catch (error) {
-      console.error('Proxy error:', error);
+      console.error('[Proxy] Error:', error);
       res.status(500).json({ error: "Failed to fetch images from external API" });
     }
   });
@@ -83,7 +99,13 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    app.use(express.static("dist"));
+    const distPath = path.resolve(__dirname, "dist");
+    app.use(express.static(distPath));
+
+    // Handle SPA routing: serve index.html for all non-API routes
+    app.get("*", (req, res) => {
+      res.sendFile(path.resolve(distPath, "index.html"));
+    });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
