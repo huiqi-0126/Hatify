@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Type, Image as ImageIcon, CheckCircle2, Wand2, ArrowRight, X } from "lucide-react";
+import { Type, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Customizer from "./Customizer";
 import InquiryForm from "./InquiryForm";
-import { GoogleGenAI } from "@google/genai";
 import { Hat3DView } from "./Hat3DView";
 
 export default function PreviewSection() {
@@ -13,15 +12,10 @@ export default function PreviewSection() {
   const [text, setText] = useState("Hatify");
   const [includeText, setIncludeText] = useState(true);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [showLimitMsg, setShowLimitMsg] = useState(false);
   const [showInquiryModal, setShowInquiryModal] = useState(false);
 
   useEffect(() => {
-    const hasGenerated = localStorage.getItem('hasGenerated3D');
-    if (hasGenerated) {
-      // We don't show limit msg immediately, only when they click again
-    }
+    // Initialization logic if needed
   }, []);
 
   const [selections, setSelections] = useState({
@@ -34,13 +28,14 @@ export default function PreviewSection() {
     stitchingColor: '#18181b',
     craft: 'embroidery',
     size: 'snap',
+    fontSize: 24,
   });
 
-  const updateSelection = (key: string, value: string) => {
+  const updateSelection = (key: string, value: string | number) => {
     setSelections(prev => {
       const next = { ...prev, [key]: value };
 
-      if (key === 'bodyColor') {
+      if (key === 'bodyColor' && typeof value === 'string') {
         next.brimColor = value;
         next.stitchingColor = value;
       }
@@ -145,7 +140,11 @@ export default function PreviewSection() {
                       whileHover={{ outline: "1px dashed rgba(16, 185, 129, 0.5)", outlineOffset: "4px" }}
                       whileTap={{ outline: "2px solid #10b981", outlineOffset: "4px", cursor: "grabbing" }}
                       className={`relative z-20 px-4 py-2 cursor-grab break-words text-center select-none ${selections.font} ${getTextColor(selections.stitchingColor)} drop-shadow-sm`}
-                      style={{ touchAction: 'none' }}
+                      style={{
+                        touchAction: 'none',
+                        fontSize: `${selections.fontSize}px`,
+                        lineHeight: 1
+                      }}
                     >
                       {text || t('preview.yourText')}
                     </motion.div>
@@ -185,37 +184,58 @@ export default function PreviewSection() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
+                    className="overflow-hidden space-y-6"
                   >
-                    <input
-                      type="text"
-                      id="custom-text"
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      maxLength={15}
-                      className="block w-full rounded-xl border-zinc-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-lg px-4 py-3 bg-white border outline-none transition-all mb-2"
-                      placeholder="Enter your text..."
-                    />
-                    <p className="text-xs text-zinc-500 text-right mb-6">
-                      {text.length}/15 characters
-                    </p>
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        id="custom-text"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        maxLength={15}
+                        className="block w-full rounded-xl border-zinc-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-lg px-4 py-3 bg-white border outline-none transition-all"
+                        placeholder="Enter your text..."
+                      />
+                      <p className="text-xs text-zinc-500 text-right">
+                        {text.length}/15 characters
+                      </p>
+                    </div>
 
-                    <label className="block text-sm font-medium text-zinc-700 mb-3">
-                      {t('customizer.font') || 'Typography Style'}
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {fonts.map(f => (
-                        <button
-                          key={f.name}
-                          onClick={() => updateSelection('font', f.class)}
-                          className={`px-4 py-3 rounded-xl border text-xl transition-all text-center ${f.class} ${selections.font === f.class
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
-                            : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
-                            }`}
-                        >
-                          {f.name}
-                        </button>
-                      ))}
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-3">
+                        {t('customizer.font') || 'Typography Style'}
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {fonts.map(f => (
+                          <button
+                            key={f.name}
+                            onClick={() => updateSelection('font', f.class)}
+                            className={`px-4 py-3 rounded-xl border text-xl transition-all text-center ${f.class} ${selections.font === f.class
+                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
+                              : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+                              }`}
+                          >
+                            {f.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <label className="block text-sm font-medium text-zinc-700">
+                          {t('customizer.fontSize') || 'Text Size'}
+                        </label>
+                        <span className="text-xs font-mono text-zinc-500 bg-zinc-100 px-2 py-1 rounded">{selections.fontSize}px</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="12"
+                        max="64"
+                        value={selections.fontSize}
+                        onChange={(e) => updateSelection('fontSize', parseInt(e.target.value))}
+                        className="w-full h-2 bg-zinc-200 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                      />
                     </div>
                   </motion.div>
                 )}
