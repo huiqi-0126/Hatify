@@ -60,17 +60,17 @@ export default function PreviewSection() {
   ];
 
   const hatMapping: Record<string, string> = {
-    womenHat: "hat (1).glb",
-    trucker: "hat (3).glb",
-    bucket: "hat (4).glb",
-    beanie: "hat (5).glb",
-    fivePanel: "hat (6).glb",
-    peakedCap: "hat (7).glb",
-    curved: "hat (8).glb",
-    flatBrim: "hat (9).glb",
+    womenHat: "hat_1.glb",
+    trucker: "hat_3.glb",
+    bucket: "hat_4.glb",
+    beanie: "hat_5.glb",
+    fivePanel: "hat_6.glb",
+    peakedCap: "hat_7.glb",
+    curved: "hat_8.glb",
+    flatBrim: "hat_9.glb",
   };
 
-  const currentSvgUrl = hatMapping[selections.baseStyle] || "hat (7).glb";
+  const currentSvgUrl = `./assets/${hatMapping[selections.baseStyle] || "hat_7.glb"}`;
 
   return (
     <section id="design" className="py-24 bg-white relative">
