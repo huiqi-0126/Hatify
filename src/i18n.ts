@@ -164,14 +164,14 @@ const resources = {
         "font": "Typography Style",
         "baseStyle": "Base Style",
         "styles": {
-          "dadHat": "Baseball / Dad Hat",
-          "bucket": "Bucket Hat",
-          "curved": "Curved Brim",
+          "womenHat": "Fashion Women's Hat",
+          "peakedCap": "Baseball / Peaked Cap",
           "trucker": "Trucker Cap",
+          "bucket": "Bucket Hat",
           "beanie": "Beanie",
           "fivePanel": "5-Panel / 6-Panel",
-          "baseball": "Classic Baseball",
-          "flatBrim": "Flat Brim"
+          "curved": "Curved Brim",
+          "flatBrim": "Flat Brim",
         },
         "material": "Material",
         "materials": {
@@ -405,14 +405,14 @@ const resources = {
         "font": "字体风格",
         "baseStyle": "基础版型",
         "styles": {
-          "dadHat": "棒球帽 / Dad Hat",
-          "bucket": "渔夫帽 Bucket Hat",
-          "curved": "弯檐帽 Curved Brim",
+          "womenHat": "时尚女帽 / Women's Hat",
+          "peakedCap": "经典棒球帽 / Peaked Cap",
           "trucker": "卡车司机网帽 Trucker Cap",
+          "bucket": "渔夫帽 Bucket Hat",
           "beanie": "针织冷帽 Beanie",
           "fivePanel": "五片帽 / 六片帽",
-          "baseball": "经典棒球帽",
-          "flatBrim": "平沿帽"
+          "curved": "弯檐帽 Curved Brim",
+          "flatBrim": "平沿帽 Flat Brim",
         },
         "material": "材质面料",
         "materials": {
@@ -646,14 +646,14 @@ const resources = {
         "font": "字体风格",
         "baseStyle": "基础版型",
         "styles": {
-          "dadHat": "棒球帽 / Dad Hat",
-          "bucket": "渔夫帽 Bucket Hat",
-          "curved": "弯檐帽 Curved Brim",
-          "trucker": "卡车司机网帽 Trucker Cap",
-          "beanie": "针织冷帽 Beanie",
+          "womenHat": "時尚女帽 / Women's Hat",
+          "peakedCap": "經典棒球帽 / Peaked Cap",
+          "trucker": "卡車司機網帽 Trucker Cap",
+          "bucket": "漁夫帽 Bucket Hat",
+          "beanie": "針織冷帽 Beanie",
           "fivePanel": "五片帽 / 六片帽",
-          "baseball": "經典棒球帽",
-          "flatBrim": "平沿帽"
+          "curved": "彎檐帽 Curved Brim",
+          "flatBrim": "平沿帽 Flat Brim",
         },
         "material": "材质面料",
         "materials": {
@@ -880,14 +880,14 @@ const resources = {
         "font": "フォントスタイル",
         "baseStyle": "ベーススタイル",
         "styles": {
-          "dadHat": "ベースボール / ダッドハット",
-          "bucket": "バケットハット",
-          "curved": "カーブブリム",
+          "womenHat": "レディースファッションハット",
+          "peakedCap": "ベースボールキャップ / Peaked Cap",
           "trucker": "トラッカーキャップ",
+          "bucket": "バケットハット",
           "beanie": "ビーニー",
           "fivePanel": "5パネル / 6パネル",
-          "baseball": "クラシックベースボール",
-          "flatBrim": "フラットブリム"
+          "curved": "カーブブリム",
+          "flatBrim": "フラットブリム",
         },
         "material": "素材",
         "materials": {
@@ -1114,14 +1114,14 @@ const resources = {
         "font": "서체 스타일",
         "baseStyle": "기본 스타일",
         "styles": {
-          "dadHat": "야구 모자 / 대드 햇",
-          "bucket": "버킷 햇",
-          "curved": "프리커브 챙",
+          "womenHat": "여성용 패션 모자",
+          "peakedCap": "야구 모자 / Peaked Cap",
           "trucker": "트러커 캡",
           "beanie": "비니",
           "fivePanel": "5패널 / 6패널",
-          "baseball": "클래식 야구 모자",
-          "flatBrim": "플랫 브림"
+          "bucket": "버킷 햇",
+          "curved": "프리커브 챙",
+          "flatBrim": "플랫 브림",
         },
         "material": "소재",
         "materials": {
@@ -1348,12 +1348,14 @@ const resources = {
         "font": "Estilo de Tipografía",
         "baseStyle": "Estilo Base",
         "styles": {
-          "dadHat": "Gorra Béisbol / Dad Hat",
-          "bucket": "Gorro de Pescador",
-          "curved": "Visera Curva",
+          "womenHat": "Gorra de Moda para Mujer",
+          "peakedCap": "Gorra de Béisbol / Peaked Cap",
           "trucker": "Gorra Trucker",
           "beanie": "Gorro",
-          "fivePanel": "5-Paneles / 6-Paneles"
+          "fivePanel": "5-Paneles / 6-Paneles",
+          "bucket": "Gorro de Pescador",
+          "curved": "Visera Curva",
+          "flatBrim": "Visera Plana",
         },
         "material": "Material",
         "materials": {
@@ -1580,12 +1582,14 @@ const resources = {
         "font": "Style typographique",
         "baseStyle": "Style de base",
         "styles": {
-          "dadHat": "Baseball / Dad Hat",
-          "bucket": "Bobs",
-          "curved": "Visière courbée",
+          "womenHat": "Chapeau Mode Femme",
+          "peakedCap": "Casquette de Baseball / Peaked Cap",
           "trucker": "Casquette Trucker",
           "beanie": "Bonnet",
-          "fivePanel": "5-Panel / 6-Panel"
+          "fivePanel": "5-Panel / 6-Panel",
+          "bucket": "Bobs",
+          "curved": "Visière courbée",
+          "flatBrim": "Visière Plate",
         },
         "material": "Matériau",
         "materials": {
@@ -1812,13 +1816,14 @@ const resources = {
         "font": "Typografie-Stil",
         "baseStyle": "Basis-Stil",
         "styles": {
-          "dadHat": "Baseball / Dad Hat",
-          "snapback": "Snapback",
-          "bucket": "Bucket Hat",
-          "curved": "Gebogener Schirm",
+          "womenHat": "Damen Modehut",
+          "peakedCap": "Schirmmütze",
           "trucker": "Trucker Cap",
+          "bucket": "Bucket Hat",
           "beanie": "Beanie",
-          "fivePanel": "5-Panel / 6-Panel"
+          "fivePanel": "5-Panel / 6-Panel",
+          "curved": "Gebogener Schirm",
+          "flatBrim": "Flacher Schirm",
         },
         "material": "Material",
         "materials": {

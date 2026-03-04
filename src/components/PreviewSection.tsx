@@ -26,7 +26,7 @@ export default function PreviewSection() {
 
   const [selections, setSelections] = useState({
     font: 'font-dancing',
-    baseStyle: 'dadHat',
+    baseStyle: 'peakedCap',
     material: 'canvas',
     bodyColor: '#f4f4f5',
     brimColor: '#f4f4f5',
@@ -39,7 +39,7 @@ export default function PreviewSection() {
   const updateSelection = (key: string, value: string) => {
     setSelections(prev => {
       const next = { ...prev, [key]: value };
-      
+
       if (key === 'bodyColor') {
         next.brimColor = value;
         next.stitchingColor = value;
@@ -65,17 +65,17 @@ export default function PreviewSection() {
   ];
 
   const hatMapping: Record<string, string> = {
-    dadHat: "hat (1).glb",
+    womenHat: "hat (1).glb",
     trucker: "hat (3).glb",
     bucket: "hat (4).glb",
     beanie: "hat (5).glb",
     fivePanel: "hat (6).glb",
-    baseball: "hat (7).glb",
+    peakedCap: "hat (7).glb",
     curved: "hat (8).glb",
     flatBrim: "hat (9).glb",
   };
 
-  const currentSvgUrl = hatMapping[selections.baseStyle] || "hat (1).svg";
+  const currentSvgUrl = hatMapping[selections.baseStyle] || "hat (7).glb";
 
   return (
     <section id="design" className="py-24 bg-white relative">

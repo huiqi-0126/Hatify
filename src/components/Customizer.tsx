@@ -19,7 +19,7 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
   };
 
   const options = {
-    baseStyle: ['dadHat', 'bucket', 'curved', 'trucker', 'beanie', 'fivePanel', 'baseball', 'flatBrim'],
+    baseStyle: ['peakedCap', 'trucker', 'bucket', 'beanie', 'fivePanel', 'curved', 'flatBrim', 'womenHat'],
     material: ['canvas', 'washed', 'mesh', 'wool', 'suede', 'polyester', 'fleece'],
     craft: ['embroidery', 'print', 'leather', 'rubber', 'woven', 'foil'],
     size: ['snap', 'elastic', 'fixed', 'audience'],
