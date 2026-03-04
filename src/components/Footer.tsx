@@ -20,12 +20,19 @@ export default function Footer({ setView }: { setView?: (view: 'home' | 'contact
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Left side: Logo and Slogan */}
           <div className="space-y-6">
-            <button
-              onClick={() => setView?.('home')}
-              className="text-3xl font-serif font-bold tracking-tighter text-zinc-900"
-            >
-              Hatify<span className="text-emerald-600">.</span>
-            </button>
+            <div className="flex items-baseline">
+              <button
+                onClick={() => setView?.('home')}
+                className="text-3xl font-serif font-bold tracking-tighter text-zinc-900"
+              >
+                Hatify
+              </button>
+              <span
+                onClick={() => setView?.('contact-list')}
+                className="text-3xl font-serif font-bold text-emerald-600 cursor-default select-none"
+                title="Admin Entrance"
+              >.</span>
+            </div>
             <p className="text-zinc-600 text-base leading-relaxed max-w-md">
               {t('hero.desc')}
             </p>
@@ -41,15 +48,6 @@ export default function Footer({ setView }: { setView?: (view: 'home' | 'contact
                   className="text-zinc-600 hover:text-zinc-900 transition-colors"
                 >
                   {t('footer.contactUs', 'Contact Us')}
-                </button>
-              </li>
-              <li className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-zinc-300"></div>
-                <button
-                  onClick={() => setView?.('contact-list')}
-                  className="text-zinc-600 hover:text-zinc-900 transition-colors"
-                >
-                  Contact List
                 </button>
               </li>
               <li className="flex items-center gap-3">

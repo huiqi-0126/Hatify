@@ -79,10 +79,10 @@ export default function PreviewSection() {
     setIsGenerating(true);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string });
-      
+
       const bodyColorName = selections.bodyColor.replace('bg-', '').replace(/-\d+/, '');
       const brimColorName = selections.brimColor.replace('bg-', '').replace(/-\d+/, '');
-      
+
       const textPrompt = includeText ? `It features ${selections.craft} with the text "${text}" on the ${selections.position}.` : `It has a clean design with no text.`;
       const prompt = `A professional 3D product render of a custom ${selections.baseStyle} hat. The hat material is ${selections.material}. The body color is ${bodyColorName}, brim color is ${brimColorName}. ${textPrompt} High quality, studio lighting, clean white background, 8k resolution, highly detailed product photography.`;
 
@@ -112,76 +112,36 @@ export default function PreviewSection() {
     }
   };
 
-  const getHatShape = (style: string) => {
-    switch (style) {
-      case 'bucket':
-        return (
-          <>
-            {/* Crown */}
-            <path d="M 65 60 L 135 60 L 150 115 L 50 115 Z" />
-            {/* Brim */}
-            <path d="M 20 145 C 60 105, 140 105, 180 145 C 140 165, 60 165, 20 145 Z" opacity="0.8" />
-            {/* Brim shadow */}
-            <path d="M 50 115 C 80 125, 120 125, 150 115 C 140 130, 60 130, 50 115 Z" fill="black" opacity="0.1" />
-          </>
-        );
-      case 'beanie':
-        return (
-          <>
-            {/* Body */}
-            <path d="M 50 120 C 50 30, 150 30, 150 120 Z" />
-            {/* Cuff */}
-            <path d="M 45 120 L 155 120 L 150 155 L 50 155 Z" opacity="0.85" />
-            {/* Cuff lines */}
-            <path d="M 45 120 L 155 120" stroke="black" strokeWidth="2" opacity="0.1" />
-            {/* Pom Pom */}
-            <circle cx="100" cy="30" r="14" opacity="0.9" />
-          </>
-        );
-      case 'snapback':
-      case 'trucker':
-        return (
-          <>
-            {/* Crown */}
-            <path d="M 50 115 L 65 45 C 80 35, 120 35, 135 45 L 150 115 Z" />
-            {/* Brim */}
-            <path d="M 30 115 C 80 105, 120 105, 170 115 C 165 130, 35 130, 30 115 Z" opacity="0.8" />
-            {/* Button */}
-            <circle cx="100" cy="38" r="5" />
-            {/* Seams */}
-            <path d="M 100 38 L 100 115" stroke="black" strokeWidth="1" opacity="0.1" />
-          </>
-        );
-      case 'fivePanel':
-        return (
-          <>
-            {/* Crown */}
-            <path d="M 50 115 L 60 50 C 80 40, 120 40, 140 50 L 150 115 Z" />
-            {/* Front Panel */}
-            <path d="M 75 45 L 70 115 M 125 45 L 130 115" stroke="black" strokeWidth="1.5" opacity="0.1" fill="none" />
-            {/* Brim */}
-            <path d="M 35 115 C 80 105, 120 105, 165 115 C 160 125, 40 125, 35 115 Z" opacity="0.8" />
-            {/* Label box placeholder */}
-            <rect x="85" y="70" width="30" height="15" fill="black" opacity="0.1" rx="2" />
-          </>
-        );
-      case 'dadHat':
-      case 'curved':
-      default:
-        return (
-          <>
-            {/* Crown */}
-            <path d="M 50 120 C 50 40, 150 40, 150 120 Z" />
-            {/* Brim */}
-            <path d="M 30 120 C 80 90, 120 90, 170 120 C 145 145, 55 145, 30 120 Z" opacity="0.8" />
-            {/* Button */}
-            <circle cx="100" cy="45" r="4" />
-            {/* Seams */}
-            <path d="M 100 45 L 100 120 M 65 110 C 75 70, 100 45, 100 45 M 135 110 C 125 70, 100 45, 100 45" stroke="black" strokeWidth="1" opacity="0.1" fill="none" />
-          </>
-        );
-    }
+  const [svgContent, setSvgContent] = useState<string>("");
+
+  const hatMapping: Record<string, string> = {
+    dadHat: "hat (1).svg",
+    snapback: "hat (8).svg",
+    trucker: "hat (3).svg",
+    bucket: "hat (4).svg",
+    beanie: "hat (5).svg",
+    fivePanel: "hat (6).svg",
+    curved: "hat (9).svg",
   };
+
+  useEffect(() => {
+    const fileName = hatMapping[selections.baseStyle] || "hat (1).svg";
+    fetch(`/${fileName}`)
+      .then(res => res.text())
+      .then(text => {
+        // Clean up SVG to make it styleable
+        // 1. Remove width/height
+        let cleaned = text.replace(/width="[^"]*"/, 'width="100%"').replace(/height="[^"]*"/, 'height="100%"');
+        // 2. Make fills currentColor or remove them so they inherit
+        cleaned = cleaned.replace(/fill="[^"]*"/g, 'fill="currentColor"');
+        cleaned = cleaned.replace(/stroke="[^"]*"/g, 'stroke="currentColor"');
+        setSvgContent(cleaned);
+      })
+      .catch(err => console.error("Failed to load SVG", err));
+  }, [selections.baseStyle]);
+
+  // We don't need getHatShape anymore
+
 
   return (
     <section id="design" className="py-24 bg-white relative">
@@ -198,9 +158,9 @@ export default function PreviewSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {/* Controls (Left Side) */}
           <div className="lg:col-span-7">
-            <Customizer 
-              selections={selections} 
-              updateSelection={updateSelection} 
+            <Customizer
+              selections={selections}
+              updateSelection={updateSelection}
               onEvaluate={() => setShowInquiryModal(true)}
             />
           </div>
@@ -208,13 +168,13 @@ export default function PreviewSection() {
           {/* Preview Area (Right Side) */}
           <div className="lg:col-span-5 lg:sticky lg:top-24">
             <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-zinc-100 flex flex-col items-center justify-center mb-6">
-              
+
               {generatedImage ? (
-                <motion.img 
+                <motion.img
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  src={generatedImage} 
-                  alt="3D Generated Hat" 
+                  src={generatedImage}
+                  alt="3D Generated Hat"
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -226,13 +186,11 @@ export default function PreviewSection() {
                   className={`absolute inset-0 flex items-center justify-center transition-colors duration-500 ${selections.bodyColor}`}
                 >
                   {/* Abstract Hat Shape */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-                    <svg
-                      viewBox="0 0 200 200"
-                      className="w-full h-full max-w-md fill-current text-zinc-900/50 transition-all duration-500"
-                    >
-                      {getHatShape(selections.baseStyle)}
-                    </svg>
+                  <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none p-4">
+                    <div
+                      className="w-full h-full flex items-center justify-center fill-current text-zinc-900/50 transition-all duration-500"
+                      dangerouslySetInnerHTML={{ __html: svgContent }}
+                    />
                   </div>
 
                   {/* The Text Preview */}
@@ -249,46 +207,7 @@ export default function PreviewSection() {
                 </motion.div>
               )}
 
-              {/* Overlay for Generate Button or Limit Message */}
-              <div className="absolute inset-0 flex flex-col items-center justify-end p-8 bg-gradient-to-t from-black/60 to-transparent">
-                {showLimitMsg ? (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white p-6 rounded-2xl shadow-xl text-center w-full max-w-sm"
-                  >
-                    <p className="text-zinc-900 font-medium mb-2">{t('preview.limitReached')}</p>
-                    <p className="text-zinc-500 text-sm mb-4">{t('preview.continueToStudio')}</p>
-                    <a 
-                      href="https://ai.dreambrand.studio" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center w-full px-4 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors"
-                    >
-                      {t('preview.studioBtn')}
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </a>
-                  </motion.div>
-                ) : (
-                  <button
-                    onClick={handleGenerate3D}
-                    disabled={isGenerating}
-                    className="flex items-center justify-center w-full max-w-xs px-6 py-4 bg-zinc-900 text-white rounded-full font-medium hover:bg-zinc-800 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-xl hover:shadow-2xl hover:-translate-y-1"
-                  >
-                    {isGenerating ? (
-                      <div className="flex items-center">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-3" />
-                        {t('preview.generating3d')}
-                      </div>
-                    ) : (
-                      <div className="flex items-center">
-                        <Wand2 className="w-5 h-5 mr-2" />
-                        {t('preview.generate3d')}
-                      </div>
-                    )}
-                  </button>
-                )}
-              </div>
+
             </div>
 
             {/* Text and Font Controls */}
@@ -302,8 +221,8 @@ export default function PreviewSection() {
                   {t('preview.yourText')}
                 </label>
                 <label className="flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     className="sr-only peer"
                     checked={includeText}
                     onChange={(e) => setIncludeText(e.target.checked)}
@@ -342,11 +261,10 @@ export default function PreviewSection() {
                         <button
                           key={f.name}
                           onClick={() => updateSelection('font', f.class)}
-                          className={`px-4 py-3 rounded-xl border text-xl transition-all text-center ${f.class} ${
-                            selections.font === f.class
-                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
-                              : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
-                          }`}
+                          className={`px-4 py-3 rounded-xl border text-xl transition-all text-center ${f.class} ${selections.font === f.class
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
+                            : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+                            }`}
                         >
                           {f.name}
                         </button>
@@ -364,7 +282,7 @@ export default function PreviewSection() {
       <AnimatePresence>
         {showInquiryModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -377,7 +295,7 @@ export default function PreviewSection() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="relative z-10 w-full max-w-4xl"
             >
-              <button 
+              <button
                 onClick={() => setShowInquiryModal(false)}
                 className="absolute top-4 right-4 p-2 bg-zinc-100 hover:bg-zinc-200 rounded-full transition-colors z-20"
               >
