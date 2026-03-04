@@ -21,7 +21,7 @@ export default function GallerySection() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const res = await fetch('/api/dreambrand/images', {
+        const res = await fetch('https://ai.dreambrand.studio/api/global/images', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

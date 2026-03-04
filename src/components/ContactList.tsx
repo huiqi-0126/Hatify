@@ -20,16 +20,14 @@ export default function ContactList({ onBack }: { onBack: () => void }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch("/api/inquiries")
-            .then((res) => res.json())
-            .then((data) => {
-                setInquiries(data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error("Failed to fetch inquiries:", error);
-                setLoading(false);
-            });
+        try {
+            const data = JSON.parse(localStorage.getItem('hatify_inquiries') || '[]');
+            setInquiries(data);
+        } catch (error) {
+            console.error("Failed to load inquiries from localStorage:", error);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
     return (

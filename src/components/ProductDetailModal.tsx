@@ -20,7 +20,7 @@ interface ProductDetailModalProps {
 export default function ProductDetailModal({ item, onClose }: ProductDetailModalProps) {
   const { t } = useTranslation();
   const [parsedDesc, setParsedDesc] = useState<{ title?: string; description?: string; prompt?: string }>({});
-  const [email, setEmail] = useState('');
+
 
   useEffect(() => {
     try {
@@ -31,7 +31,7 @@ export default function ProductDetailModal({ item, onClose }: ProductDetailModal
     } catch (e) {
       console.error('Failed to parse description', e);
     }
-    
+
     // Prevent body scroll
     document.body.style.overflow = 'hidden';
     return () => {
@@ -42,7 +42,7 @@ export default function ProductDetailModal({ item, onClose }: ProductDetailModal
   const getHighlightsFromPrompt = (prompt: string) => {
     const lowerPrompt = (prompt || '').toLowerCase();
     const highlights = [];
-    
+
     // Material
     if (lowerPrompt.includes('corduroy')) highlights.push({ icon: <Sparkles className="w-5 h-5" />, label: t('product.highlightMaterialCorduroy', 'Material: Premium Corduroy') });
     else if (lowerPrompt.includes('wool')) highlights.push({ icon: <Sparkles className="w-5 h-5" />, label: t('product.highlightMaterialWool', 'Material: Premium Wool Blend') });
@@ -66,7 +66,7 @@ export default function ProductDetailModal({ item, onClose }: ProductDetailModal
     }
 
     highlights.push({ icon: <Ruler className="w-5 h-5" />, label: t('product.highlightSize', 'Size: One Size Fits Most') });
-    
+
     if (lowerPrompt.includes('3d') || lowerPrompt.includes('puff')) {
       highlights.push({ icon: <Settings className="w-5 h-5" />, label: t('product.highlight3DEmbroidery', 'Premium 3D Puff Embroidery') });
     } else {
@@ -89,7 +89,7 @@ export default function ProductDetailModal({ item, onClose }: ProductDetailModal
       { user: 'Amanda W.', rating: 5, date: '4 days ago', text: 'Exceeded my expectations! The 3D puff embroidery looks incredibly premium.', helpful: 20 },
       { user: 'Chris P.', rating: 5, date: '2 weeks ago', text: 'Perfect gift! The personalization makes it so special and the material feels very durable.', helpful: 11 },
     ];
-    
+
     let hash = 0;
     const idStr = String(imageId || 'default');
     for (let i = 0; i < idStr.length; i++) {
@@ -117,7 +117,7 @@ export default function ProductDetailModal({ item, onClose }: ProductDetailModal
           className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm"
           onClick={onClose}
         />
-        
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -140,7 +140,7 @@ export default function ProductDetailModal({ item, onClose }: ProductDetailModal
           {/* Content Scrollable Area */}
           <div className="flex-1 overflow-y-auto p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-              
+
               {/* Left Column: Image */}
               <div className="space-y-6">
                 <div className="aspect-square rounded-2xl overflow-hidden bg-zinc-50 border border-zinc-100">
@@ -151,7 +151,7 @@ export default function ProductDetailModal({ item, onClose }: ProductDetailModal
                     referrerPolicy="no-referrer"
                   />
                 </div>
-                
+
                 {/* Description snippet if available */}
                 {inspirationText && (
                   <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
@@ -206,22 +206,14 @@ export default function ProductDetailModal({ item, onClose }: ProductDetailModal
 
                 {/* Action */}
                 <div className="mt-8 pt-6 border-t border-zinc-100">
-                  <div className="mb-4">
-                    <label htmlFor="email" className="block text-sm font-medium text-zinc-700 mb-2">
-                      {t('product.emailLabel')}
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder={t('product.emailPlaceholder')}
-                      className="w-full px-4 py-3 rounded-xl border border-zinc-200 focus:ring-2 focus:ring-zinc-900 focus:border-transparent outline-none transition-all"
-                    />
-                  </div>
-                  <button className="w-full bg-zinc-900 text-white py-4 rounded-xl font-medium hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/20">
-                    {t('product.customizeBtn')}
-                  </button>
+                  <a
+                    href={`https://ai.dreambrand.studio/image/detail?image_id=${item.image_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full text-center bg-zinc-900 text-white py-4 rounded-xl font-medium hover:bg-zinc-800 transition-colors shadow-lg shadow-zinc-900/20 hover:text-white"
+                  >
+                    {t('gallery.details', '查看详情')}
+                  </a>
                 </div>
               </div>
             </div>

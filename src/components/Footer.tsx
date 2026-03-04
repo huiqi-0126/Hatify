@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { X, Mail, Copy, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
-export default function Footer() {
+export default function Footer({ setView }: { setView?: (view: 'home' | 'contact-list') => void }) {
   const { t } = useTranslation();
   const [modalContent, setModalContent] = useState<{ title: string, url?: string, type: 'iframe' | 'contact' | 'privacy' | 'terms' } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -20,17 +20,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           {/* Left side: Logo and Slogan */}
           <div className="space-y-6">
-            <a
-              href="/"
+            <button
+              onClick={() => setView?.('home')}
               className="text-3xl font-serif font-bold tracking-tighter text-zinc-900"
             >
               Hatify<span className="text-emerald-600">.</span>
-            </a>
+            </button>
             <p className="text-zinc-600 text-base leading-relaxed max-w-md">
               {t('hero.desc')}
             </p>
           </div>
-          
+
           {/* Right side: Links */}
           <div className="flex flex-col md:items-end justify-center">
             <ul className="space-y-4">
@@ -41,6 +41,15 @@ export default function Footer() {
                   className="text-zinc-600 hover:text-zinc-900 transition-colors"
                 >
                   {t('footer.contactUs', 'Contact Us')}
+                </button>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-300"></div>
+                <button
+                  onClick={() => setView?.('contact-list')}
+                  className="text-zinc-600 hover:text-zinc-900 transition-colors"
+                >
+                  Contact List
                 </button>
               </li>
               <li className="flex items-center gap-3">
@@ -64,7 +73,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-        
+
         <div className="mt-16 pt-8 border-t border-zinc-200 flex justify-center md:justify-start">
           <p className="text-sm text-zinc-500">
             &copy; {new Date().getFullYear()} Hatify. All rights reserved.
@@ -76,7 +85,7 @@ export default function Footer() {
       <AnimatePresence>
         {modalContent && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -93,7 +102,7 @@ export default function Footer() {
                 <h3 className="text-xl font-serif font-bold text-zinc-900">
                   {modalContent.title}
                 </h3>
-                <button 
+                <button
                   onClick={() => setModalContent(null)}
                   className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors"
                 >
@@ -103,8 +112,8 @@ export default function Footer() {
               <div className="p-6 bg-zinc-50/50 overflow-y-auto">
                 {modalContent.type === 'iframe' ? (
                   <div className="w-full h-[70vh] bg-white rounded-xl border border-zinc-200 overflow-hidden">
-                    <iframe 
-                      src={modalContent.url} 
+                    <iframe
+                      src={modalContent.url}
                       className="w-full h-full border-0"
                       title={modalContent.title}
                     />
@@ -119,13 +128,13 @@ export default function Footer() {
                       For questions about custom orders, collaborations, or general inquiries, please email us at:
                     </p>
                     <div className="flex items-center justify-center gap-4">
-                      <a 
-                        href="mailto:support@dreambrand.studio" 
+                      <a
+                        href="mailto:support@dreambrand.studio"
                         className="text-2xl font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
                       >
                         support@dreambrand.studio
                       </a>
-                      <button 
+                      <button
                         onClick={handleCopyEmail}
                         className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-full transition-colors"
                         title="Copy email address"

@@ -20,24 +20,21 @@ export default function InquiryForm({ selections = {}, text = '', includeText = 
     e.preventDefault();
     setStatus('submitting');
     try {
-      const response = await fetch('/api/inquiries', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          design_text: includeText ? text : 'N/A',
-          hat_style: selections.baseStyle || 'N/A',
-          selections: selections
-        }),
-      });
-      if (response.ok) {
-        setStatus('success');
-        setFormData({ contact: '', story: '' });
-      } else {
-        setStatus('error');
-      }
+      const newInquiry = {
+        id: Date.now(),
+        design_text: includeText ? text : 'N/A',
+        hat_style: selections.baseStyle || 'N/A',
+        contact: formData.contact,
+        story: formData.story,
+        selections: selections,
+        created_at: new Date().toISOString()
+      };
+
+      const existing = JSON.parse(localStorage.getItem('hatify_inquiries') || '[]');
+      localStorage.setItem('hatify_inquiries', JSON.stringify([newInquiry, ...existing]));
+
+      setStatus('success');
+      setFormData({ contact: '', story: '' });
     } catch (error) {
       setStatus('error');
     }
@@ -71,18 +68,18 @@ export default function InquiryForm({ selections = {}, text = '', includeText = 
         <h3 className="text-xl font-medium text-zinc-900 mb-6">
           Your Design Details
         </h3>
-        
+
         <div className="space-y-1">
           {includeText && renderSelectionItem(t('preview.yourText'), text)}
           {includeText && renderSelectionItem(t('customizer.font'), getTranslatedValue('fonts', selections.font) || selections.font)}
-          
+
           {renderSelectionItem(t('customizer.baseStyle'), getTranslatedValue('styles', selections.baseStyle))}
           {renderSelectionItem(t('customizer.material'), getTranslatedValue('materials', selections.material))}
-          
+
           {renderSelectionItem(t('customizer.craft'), getTranslatedValue('crafts', selections.craft))}
           {renderSelectionItem(t('customizer.position'), getTranslatedValue('positions', selections.position))}
           {renderSelectionItem(t('customizer.size'), getTranslatedValue('sizes', selections.size))}
-          
+
           {selections.details && (
             <div className="flex items-start gap-3 py-3 border-b border-zinc-100 last:border-0">
               <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
