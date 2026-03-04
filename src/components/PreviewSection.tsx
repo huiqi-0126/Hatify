@@ -42,7 +42,7 @@ export default function PreviewSection() {
       const next = { ...prev, [key]: value };
       if (key === 'scenario') {
         switch (value) {
-          case 'team': next.baseStyle = 'snapback'; break;
+          case 'team': next.baseStyle = 'dadHat'; break;
           case 'corporate': next.baseStyle = 'dadHat'; break;
           case 'wedding': next.baseStyle = 'dadHat'; break;
           case 'sports': next.baseStyle = 'curved'; break;
@@ -115,7 +115,6 @@ export default function PreviewSection() {
 
   const hatMapping: Record<string, string> = {
     dadHat: "hat (1).glb",
-    snapback: "hat (2).glb",
     trucker: "hat (3).glb",
     bucket: "hat (4).glb",
     beanie: "hat (5).glb",

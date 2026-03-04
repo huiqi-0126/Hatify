@@ -28,7 +28,8 @@ const getTailwindHex = (twClass: string) => {
 };
 
 const HatModel = ({ url, bodyColor }: { url: string; bodyColor: string }) => {
-    const { scene } = useGLTF(url);
+    const { scene: originalScene } = useGLTF(url);
+    const scene = useMemo(() => originalScene.clone(), [originalScene]);
     const color = useMemo(() => new THREE.Color(getTailwindHex(bodyColor)), [bodyColor]);
 
     const scale = useMemo(() => {
@@ -36,7 +37,6 @@ const HatModel = ({ url, bodyColor }: { url: string; bodyColor: string }) => {
         const size = new THREE.Vector3();
         box.getSize(size);
         const maxDim = Math.max(size.x, size.y, size.z);
-        // Normalize size so it fits perfectly in the view (assuming 40 is a good standard size for the fov)
         return 45 / maxDim;
     }, [scene]);
 
@@ -71,7 +71,7 @@ export const Hat3DView = (props: Hat3DViewProps) => {
                     <pointLight position={[-100, -100, 100]} intensity={1} />
 
                     <Float speed={1.5} rotationIntensity={0.5} floatIntensity={0.5}>
-                        <Center top>
+                        <Center>
                             <HatModel url={props.modelUrl} bodyColor={props.bodyColor} />
                         </Center>
                     </Float>

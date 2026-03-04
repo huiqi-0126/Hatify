@@ -165,7 +165,6 @@ const resources = {
         "baseStyle": "Base Style",
         "styles": {
           "dadHat": "Baseball / Dad Hat",
-          "snapback": "Snapback",
           "bucket": "Bucket Hat",
           "curved": "Curved Brim",
           "trucker": "Trucker Cap",
@@ -407,7 +406,6 @@ const resources = {
         "baseStyle": "基础版型",
         "styles": {
           "dadHat": "棒球帽 / Dad Hat",
-          "snapback": "平沿帽 Snapback",
           "bucket": "渔夫帽 Bucket Hat",
           "curved": "弯檐帽 Curved Brim",
           "trucker": "卡车司机网帽 Trucker Cap",
@@ -649,7 +647,6 @@ const resources = {
         "baseStyle": "基础版型",
         "styles": {
           "dadHat": "棒球帽 / Dad Hat",
-          "snapback": "平沿帽 Snapback",
           "bucket": "渔夫帽 Bucket Hat",
           "curved": "弯檐帽 Curved Brim",
           "trucker": "卡车司机网帽 Trucker Cap",
@@ -884,7 +881,6 @@ const resources = {
         "baseStyle": "ベーススタイル",
         "styles": {
           "dadHat": "ベースボール / ダッドハット",
-          "snapback": "スナップバック",
           "bucket": "バケットハット",
           "curved": "カーブブリム",
           "trucker": "トラッカーキャップ",
@@ -1119,7 +1115,6 @@ const resources = {
         "baseStyle": "기본 스타일",
         "styles": {
           "dadHat": "야구 모자 / 대드 햇",
-          "snapback": "스냅백",
           "bucket": "버킷 햇",
           "curved": "프리커브 챙",
           "trucker": "트러커 캡",
@@ -1354,7 +1349,6 @@ const resources = {
         "baseStyle": "Estilo Base",
         "styles": {
           "dadHat": "Gorra Béisbol / Dad Hat",
-          "snapback": "Snapback",
           "bucket": "Gorro de Pescador",
           "curved": "Visera Curva",
           "trucker": "Gorra Trucker",
@@ -1587,7 +1581,6 @@ const resources = {
         "baseStyle": "Style de base",
         "styles": {
           "dadHat": "Baseball / Dad Hat",
-          "snapback": "Snapback",
           "bucket": "Bobs",
           "curved": "Visière courbée",
           "trucker": "Casquette Trucker",
