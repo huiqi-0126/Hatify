@@ -170,7 +170,9 @@ const resources = {
           "curved": "Curved Brim",
           "trucker": "Trucker Cap",
           "beanie": "Beanie",
-          "fivePanel": "5-Panel / 6-Panel"
+          "fivePanel": "5-Panel / 6-Panel",
+          "baseball": "Classic Baseball",
+          "flatBrim": "Flat Brim"
         },
         "material": "Material",
         "materials": {
@@ -410,7 +412,9 @@ const resources = {
           "curved": "弯檐帽 Curved Brim",
           "trucker": "卡车司机网帽 Trucker Cap",
           "beanie": "针织冷帽 Beanie",
-          "fivePanel": "五片帽 / 六片帽"
+          "fivePanel": "五片帽 / 六片帽",
+          "baseball": "经典棒球帽",
+          "flatBrim": "平沿帽"
         },
         "material": "材质面料",
         "materials": {
@@ -650,7 +654,9 @@ const resources = {
           "curved": "弯檐帽 Curved Brim",
           "trucker": "卡车司机网帽 Trucker Cap",
           "beanie": "针织冷帽 Beanie",
-          "fivePanel": "五片帽 / 六片帽"
+          "fivePanel": "五片帽 / 六片帽",
+          "baseball": "經典棒球帽",
+          "flatBrim": "平沿帽"
         },
         "material": "材质面料",
         "materials": {
@@ -883,7 +889,9 @@ const resources = {
           "curved": "カーブブリム",
           "trucker": "トラッカーキャップ",
           "beanie": "ビーニー",
-          "fivePanel": "5パネル / 6パネル"
+          "fivePanel": "5パネル / 6パネル",
+          "baseball": "クラシックベースボール",
+          "flatBrim": "フラットブリム"
         },
         "material": "素材",
         "materials": {
@@ -1116,7 +1124,9 @@ const resources = {
           "curved": "프리커브 챙",
           "trucker": "트러커 캡",
           "beanie": "비니",
-          "fivePanel": "5패널 / 6패널"
+          "fivePanel": "5패널 / 6패널",
+          "baseball": "클래식 야구 모자",
+          "flatBrim": "플랫 브림"
         },
         "material": "소재",
         "materials": {

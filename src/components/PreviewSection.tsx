@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import Customizer from "./Customizer";
 import InquiryForm from "./InquiryForm";
 import { GoogleGenAI } from "@google/genai";
+import { Hat3DView } from "./Hat3DView";
 
 export default function PreviewSection() {
   const { t } = useTranslation();
@@ -112,35 +113,19 @@ export default function PreviewSection() {
     }
   };
 
-  const [svgContent, setSvgContent] = useState<string>("");
-
   const hatMapping: Record<string, string> = {
-    dadHat: "hat (1).svg",
-    snapback: "hat (8).svg",
-    trucker: "hat (3).svg",
-    bucket: "hat (4).svg",
-    beanie: "hat (5).svg",
-    fivePanel: "hat (6).svg",
-    curved: "hat (9).svg",
+    dadHat: "hat (1).glb",
+    snapback: "hat (2).glb",
+    trucker: "hat (3).glb",
+    bucket: "hat (4).glb",
+    beanie: "hat (5).glb",
+    fivePanel: "hat (6).glb",
+    baseball: "hat (7).glb",
+    curved: "hat (8).glb",
+    flatBrim: "hat (9).glb",
   };
 
-  useEffect(() => {
-    const fileName = hatMapping[selections.baseStyle] || "hat (1).svg";
-    fetch(`/${fileName}`)
-      .then(res => res.text())
-      .then(text => {
-        // Clean up SVG to make it styleable
-        // 1. Remove width/height
-        let cleaned = text.replace(/width="[^"]*"/, 'width="100%"').replace(/height="[^"]*"/, 'height="100%"');
-        // 2. Make fills currentColor or remove them so they inherit
-        cleaned = cleaned.replace(/fill="[^"]*"/g, 'fill="currentColor"');
-        cleaned = cleaned.replace(/stroke="[^"]*"/g, 'stroke="currentColor"');
-        setSvgContent(cleaned);
-      })
-      .catch(err => console.error("Failed to load SVG", err));
-  }, [selections.baseStyle]);
-
-  // We don't need getHatShape anymore
+  const currentSvgUrl = hatMapping[selections.baseStyle] || "hat (1).svg";
 
 
   return (
@@ -155,9 +140,9 @@ export default function PreviewSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Controls (Left Side) */}
-          <div className="lg:col-span-7">
+          <div className="order-2 lg:order-1">
             <Customizer
               selections={selections}
               updateSelection={updateSelection}
@@ -165,147 +150,150 @@ export default function PreviewSection() {
             />
           </div>
 
-          {/* Preview Area (Right Side) */}
-          <div className="lg:col-span-5 lg:sticky lg:top-24">
-            <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl bg-zinc-100 flex flex-col items-center justify-center mb-6">
+          <div className="order-1 lg:order-2 lg:sticky lg:top-24">
+              <div className="relative aspect-[4/5] sm:aspect-square rounded-3xl overflow-hidden shadow-2xl bg-zinc-100 flex flex-col items-center justify-center mb-6 border border-zinc-200">
 
-              {generatedImage ? (
-                <motion.img
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  src={generatedImage}
-                  alt="3D Generated Hat"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
-                  className={`absolute inset-0 flex items-center justify-center transition-colors duration-500 ${selections.bodyColor}`}
-                >
-                  {/* Abstract Hat Shape */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none p-4">
-                    <div
-                      className="w-full h-full flex items-center justify-center fill-current text-zinc-900/50 transition-all duration-500"
-                      dangerouslySetInnerHTML={{ __html: svgContent }}
-                    />
-                  </div>
-
-                  {/* The Text Preview */}
-                  {includeText && (
-                    <div
-                      className={`relative z-10 text-xl sm:text-2xl tracking-tight text-center px-8 break-words w-full ${selections.font} ${getTextColor(selections.stitchingColor)} drop-shadow-sm`}
-                    >
-                      {text || t('preview.yourText')}
-                    </div>
-                  )}
-
-                  {/* Realistic texture overlay */}
-                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/fabric-of-squares.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
-                </motion.div>
-              )}
-
-
-            </div>
-
-            {/* Text and Font Controls */}
-            <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
-              <div className="flex items-center justify-between mb-4">
-                <label
-                  htmlFor="custom-text"
-                  className="text-sm font-medium text-zinc-700 flex items-center"
-                >
-                  <Type className="w-4 h-4 mr-2" />
-                  {t('preview.yourText')}
-                </label>
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={includeText}
-                    onChange={(e) => setIncludeText(e.target.checked)}
+                {generatedImage ? (
+                  <motion.img
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    src={generatedImage}
+                    alt="3D Generated Hat"
+                    className="w-full h-full object-cover"
                   />
-                  <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 relative"></div>
-                  <span className="ml-3 text-sm font-medium text-zinc-700">{t('customizer.includeText') || 'Include Text'}</span>
-                </label>
-              </div>
-
-              <AnimatePresence>
-                {includeText && (
+                ) : (
                   <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    className="overflow-hidden"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                    className={`absolute inset-0 flex items-center justify-center transition-colors duration-500 ${selections.bodyColor}`}
                   >
-                    <input
-                      type="text"
-                      id="custom-text"
-                      value={text}
-                      onChange={(e) => setText(e.target.value)}
-                      maxLength={15}
-                      className="block w-full rounded-xl border-zinc-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-lg px-4 py-3 bg-white border outline-none transition-all mb-2"
-                      placeholder="Enter your text..."
-                    />
-                    <p className="text-xs text-zinc-500 text-right mb-6">
-                      {text.length}/15 characters
-                    </p>
-
-                    <label className="block text-sm font-medium text-zinc-700 mb-3">
-                      {t('customizer.font') || 'Typography Style'}
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {fonts.map(f => (
-                        <button
-                          key={f.name}
-                          onClick={() => updateSelection('font', f.class)}
-                          className={`px-4 py-3 rounded-xl border text-xl transition-all text-center ${f.class} ${selections.font === f.class
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
-                            : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
-                            }`}
-                        >
-                          {f.name}
-                        </button>
-                      ))}
+                    {/* Abstract Hat Shape */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-90 pointer-events-auto">
+                      <Hat3DView
+                        modelUrl={currentSvgUrl}
+                        bodyColor={selections.bodyColor}
+                        stitchingColor={selections.stitchingColor}
+                        text={text}
+                        font={selections.font}
+                        includeText={includeText}
+                      />
                     </div>
+
+                    {/* The Text Preview */}
+                    {includeText && (
+                      <div
+                        className={`relative z-10 text-xl sm:text-2xl tracking-tight text-center px-8 break-words w-full ${selections.font} ${getTextColor(selections.stitchingColor)} drop-shadow-sm`}
+                      >
+                        {text || t('preview.yourText')}
+                      </div>
+                    )}
+
+                    {/* Realistic texture overlay */}
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/fabric-of-squares.png')] opacity-10 mix-blend-overlay pointer-events-none"></div>
                   </motion.div>
                 )}
-              </AnimatePresence>
+
+
+              </div>
+
+              {/* Text and Font Controls */}
+              <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100">
+                <div className="flex items-center justify-between mb-4">
+                  <label
+                    htmlFor="custom-text"
+                    className="text-sm font-medium text-zinc-700 flex items-center"
+                  >
+                    <Type className="w-4 h-4 mr-2" />
+                    {t('preview.yourText')}
+                  </label>
+                  <label className="flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={includeText}
+                      onChange={(e) => setIncludeText(e.target.checked)}
+                    />
+                    <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 relative"></div>
+                    <span className="ml-3 text-sm font-medium text-zinc-700">{t('customizer.includeText') || 'Include Text'}</span>
+                  </label>
+                </div>
+
+                <AnimatePresence>
+                  {includeText && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <input
+                        type="text"
+                        id="custom-text"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        maxLength={15}
+                        className="block w-full rounded-xl border-zinc-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-lg px-4 py-3 bg-white border outline-none transition-all mb-2"
+                        placeholder="Enter your text..."
+                      />
+                      <p className="text-xs text-zinc-500 text-right mb-6">
+                        {text.length}/15 characters
+                      </p>
+
+                      <label className="block text-sm font-medium text-zinc-700 mb-3">
+                        {t('customizer.font') || 'Typography Style'}
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {fonts.map(f => (
+                          <button
+                            key={f.name}
+                            onClick={() => updateSelection('font', f.class)}
+                            className={`px-4 py-3 rounded-xl border text-xl transition-all text-center ${f.class} ${selections.font === f.class
+                              ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
+                              : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+                              }`}
+                          >
+                            {f.name}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Inquiry Modal */}
-      <AnimatePresence>
-        {showInquiryModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-              onClick={() => setShowInquiryModal(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative z-10 w-full max-w-4xl"
-            >
-              <button
+        {/* Inquiry Modal */}
+        <AnimatePresence>
+          {showInquiryModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                 onClick={() => setShowInquiryModal(false)}
-                className="absolute top-4 right-4 p-2 bg-zinc-100 hover:bg-zinc-200 rounded-full transition-colors z-20"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="relative z-10 w-full max-w-4xl"
               >
-                <X className="w-5 h-5 text-zinc-600" />
-              </button>
-              <InquiryForm selections={selections} text={text} includeText={includeText} />
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                <button
+                  onClick={() => setShowInquiryModal(false)}
+                  className="absolute top-4 right-4 p-2 bg-zinc-100 hover:bg-zinc-200 rounded-full transition-colors z-20"
+                >
+                  <X className="w-5 h-5 text-zinc-600" />
+                </button>
+                <InquiryForm selections={selections} text={text} includeText={includeText} />
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
+
     </section>
   );
 }

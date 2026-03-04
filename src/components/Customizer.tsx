@@ -23,7 +23,7 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
   };
 
   const options = {
-    baseStyle: ['dadHat', 'snapback', 'bucket', 'curved', 'trucker', 'beanie', 'fivePanel'],
+    baseStyle: ['dadHat', 'snapback', 'bucket', 'curved', 'trucker', 'beanie', 'fivePanel', 'baseball', 'flatBrim'],
     material: ['canvas', 'washed', 'mesh', 'wool', 'suede', 'polyester', 'fleece'],
     craft: ['embroidery', 'print', 'leather', 'rubber', 'woven', 'foil'],
     position: ['front', 'left', 'right', 'back', 'underBrim', 'innerBand', 'top'],
