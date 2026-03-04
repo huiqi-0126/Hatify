@@ -72,8 +72,8 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
           key={item}
           onClick={() => updateSelection(category, item)}
           className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all text-left ${selections[category] === item
-              ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
-              : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
+            ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
+            : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
             }`}
         >
           {t(`customizer.${translationKey}.${item}`)}
@@ -84,7 +84,7 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
 
   const renderColorOptions = () => (
     <div>
-      <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.color') || 'Hat Color'}</label>
+      <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.color')}</label>
       <div className="flex flex-wrap gap-3 items-center">
         {colors.map(c => (
           <button
@@ -109,7 +109,7 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
             className="w-10 h-10 rounded-full overflow-hidden cursor-pointer border-2 border-white shadow-sm ring-1 ring-zinc-200"
           />
           <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-            {t('customizer.customColor') || 'Custom'}
+            {t('customizer.customColor')}
           </div>
         </div>
       </div>
@@ -119,7 +119,7 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
   return (
     <div className="max-w-3xl mx-auto">
       {/* Group 1: Style & Color */}
-      {renderSection('group_style', t('customizer.groups.style') || '款式与颜色', (
+      {renderSection('group_style', t('customizer.groups.style'), (
         <div className="space-y-8">
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.baseStyle')}</label>
@@ -130,7 +130,7 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
       ))}
 
       {/* Group 2: Material, Craft, Size */}
-      {renderSection('group_craft', t('customizer.groups.craft') || '材质与工艺', (
+      {renderSection('group_craft', t('customizer.groups.craft'), (
         <div className="space-y-8">
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.material')}</label>

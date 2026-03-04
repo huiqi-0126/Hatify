@@ -162,6 +162,13 @@ const resources = {
       },
       "customizer": {
         "font": "Typography Style",
+        "fontSize": "Text Size",
+        "groups": {
+          "style": "Style & Color",
+          "craft": "Material & Craft"
+        },
+        "color": "Hat Color",
+        "customColor": "Custom Color",
         "baseStyle": "Base Style",
         "styles": {
           "womenHat": "Fashion Women's Hat",
@@ -403,6 +410,13 @@ const resources = {
       },
       "customizer": {
         "font": "字体风格",
+        "fontSize": "字体大小",
+        "groups": {
+          "style": "款式与颜色",
+          "craft": "材质与工艺"
+        },
+        "color": "帽子颜色",
+        "customColor": "自定义颜色",
         "baseStyle": "基础版型",
         "styles": {
           "womenHat": "时尚女帽 / Women's Hat",
@@ -643,8 +657,15 @@ const resources = {
         "error": "提交失败，请重试。"
       },
       "customizer": {
-        "font": "字体风格",
-        "baseStyle": "基础版型",
+        "font": "字體風格",
+        "fontSize": "字體大小",
+        "groups": {
+          "style": "款式與顏色",
+          "craft": "材質與工藝"
+        },
+        "color": "帽子顏色",
+        "customColor": "自定義顏色",
+        "baseStyle": "基礎版型",
         "styles": {
           "womenHat": "時尚女帽 / Women's Hat",
           "peakedCap": "經典棒球帽 / Peaked Cap",
@@ -878,6 +899,13 @@ const resources = {
       },
       "customizer": {
         "font": "フォントスタイル",
+        "fontSize": "フォントサイズ",
+        "groups": {
+          "style": "スタイルとカラー",
+          "craft": "素材と工芸"
+        },
+        "color": "帽子のカラー",
+        "customColor": "カスタムカラー",
         "baseStyle": "ベーススタイル",
         "styles": {
           "womenHat": "レディースファッションハット",
@@ -1112,6 +1140,13 @@ const resources = {
       },
       "customizer": {
         "font": "서체 스타일",
+        "fontSize": "글자 크기",
+        "groups": {
+          "style": "스타일 및 색상",
+          "craft": "소재 및 공정"
+        },
+        "color": "모자 색상",
+        "customColor": "사용자 지정 색상",
         "baseStyle": "기본 스타일",
         "styles": {
           "womenHat": "여성용 패션 모자",
@@ -1346,6 +1381,13 @@ const resources = {
       },
       "customizer": {
         "font": "Estilo de Tipografía",
+        "fontSize": "Tamaño del Texto",
+        "groups": {
+          "style": "Estilo y Color",
+          "craft": "Material y Artesanía"
+        },
+        "color": "Color de la Gorra",
+        "customColor": "Color Personalizado",
         "baseStyle": "Estilo Base",
         "styles": {
           "womenHat": "Gorra de Moda para Mujer",
@@ -1580,6 +1622,13 @@ const resources = {
       },
       "customizer": {
         "font": "Style typographique",
+        "fontSize": "Taille du texte",
+        "groups": {
+          "style": "Style et Couleur",
+          "craft": "Matériau et Savoir-faire"
+        },
+        "color": "Couleur du chapeau",
+        "customColor": "Couleur personnalisée",
         "baseStyle": "Style de base",
         "styles": {
           "womenHat": "Chapeau Mode Femme",
@@ -1814,6 +1863,13 @@ const resources = {
       },
       "customizer": {
         "font": "Typografie-Stil",
+        "fontSize": "Textgröße",
+        "groups": {
+          "style": "Stil & Farbe",
+          "craft": "Material & Veredelung"
+        },
+        "color": "Hutfarbe",
+        "customColor": "Benutzerdefinierte Farbe",
         "baseStyle": "Basis-Stil",
         "styles": {
           "womenHat": "Damen Modehut",
