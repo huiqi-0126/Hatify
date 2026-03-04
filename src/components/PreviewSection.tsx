@@ -26,7 +26,7 @@ export default function PreviewSection() {
 
   const [selections, setSelections] = useState({
     font: 'font-dancing',
-    baseStyle: 'peakedCap',
+    baseStyle: 'womenHat',
     material: 'canvas',
     bodyColor: '#f4f4f5',
     brimColor: '#f4f4f5',

@@ -19,7 +19,7 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
   };
 
   const options = {
-    baseStyle: ['peakedCap', 'trucker', 'bucket', 'beanie', 'fivePanel', 'curved', 'flatBrim', 'womenHat'],
+    baseStyle: ['womenHat', 'peakedCap', 'trucker', 'bucket', 'beanie', 'fivePanel', 'curved', 'flatBrim'],
     material: ['canvas', 'washed', 'mesh', 'wool', 'suede', 'polyester', 'fleece'],
     craft: ['embroidery', 'print', 'leather', 'rubber', 'woven', 'foil'],
     size: ['snap', 'elastic', 'fixed', 'audience'],
@@ -71,11 +71,10 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
         <button
           key={item}
           onClick={() => updateSelection(category, item)}
-          className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all text-left ${
-            selections[category] === item
+          className={`px-4 py-3 rounded-xl border text-sm font-medium transition-all text-left ${selections[category] === item
               ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
               : 'border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50'
-          }`}
+            }`}
         >
           {t(`customizer.${translationKey}.${item}`)}
         </button>
@@ -91,9 +90,8 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
           <button
             key={c.name}
             onClick={() => updateSelection('bodyColor', c.hex)}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-110 shadow-sm ${
-              selections.bodyColor === c.hex ? 'ring-2 ring-offset-2 ring-emerald-500 scale-110' : ''
-            }`}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-110 shadow-sm ${selections.bodyColor === c.hex ? 'ring-2 ring-offset-2 ring-emerald-500 scale-110' : ''
+              }`}
             style={{ backgroundColor: c.hex, border: c.name === 'White' ? '1px solid #e4e4e7' : 'none' }}
             aria-label={c.name}
           >
@@ -102,7 +100,7 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
             )}
           </button>
         ))}
-        
+
         <div className="relative group">
           <input
             type="color"
@@ -163,13 +161,13 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
           />
         </div>
       </div>
-      
+
       <div className="mt-8 p-6 bg-zinc-900 rounded-2xl text-white flex flex-col sm:flex-row items-center justify-between shadow-xl">
         <div>
           <h4 className="text-lg font-medium mb-1">{t('preview.orderBtn')}</h4>
           <p className="text-zinc-400 text-sm">{t('preview.freeShipping')}</p>
         </div>
-        <button 
+        <button
           onClick={onEvaluate}
           className="mt-4 sm:mt-0 px-8 py-3 bg-white text-zinc-900 rounded-full font-medium hover:bg-zinc-100 transition-colors"
         >
