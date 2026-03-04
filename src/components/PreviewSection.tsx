@@ -33,9 +33,7 @@ export default function PreviewSection() {
     sweatbandColor: '#18181b',
     stitchingColor: '#18181b',
     craft: 'embroidery',
-    position: 'front',
     size: 'snap',
-    scenario: 'streetwear',
   });
 
   const updateSelection = (key: string, value: string) => {
@@ -45,17 +43,6 @@ export default function PreviewSection() {
       if (key === 'bodyColor') {
         next.brimColor = value;
         next.stitchingColor = value;
-      }
-
-      if (key === 'scenario') {
-        switch (value) {
-          case 'team': next.baseStyle = 'dadHat'; break;
-          case 'corporate': next.baseStyle = 'dadHat'; break;
-          case 'wedding': next.baseStyle = 'dadHat'; break;
-          case 'sports': next.baseStyle = 'curved'; break;
-          case 'streetwear': next.baseStyle = 'fivePanel'; break;
-          case 'family': next.baseStyle = 'bucket'; break;
-        }
       }
       return next;
     });

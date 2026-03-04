@@ -12,24 +12,17 @@ interface CustomizerProps {
 export default function Customizer({ selections, updateSelection, onEvaluate }: CustomizerProps) {
   const { t } = useTranslation();
 
-  const [expandedSection, setExpandedSection] = useState<string | null>('scenario');
+  const [expandedSection, setExpandedSection] = useState<string | null>('group_style');
 
   const toggleSection = (section: string) => {
-    if (expandedSection === section) {
-      setExpandedSection(null);
-    } else {
-      setExpandedSection(section);
-    }
+    setExpandedSection(expandedSection === section ? null : section);
   };
 
   const options = {
     baseStyle: ['dadHat', 'bucket', 'curved', 'trucker', 'beanie', 'fivePanel', 'baseball', 'flatBrim'],
     material: ['canvas', 'washed', 'mesh', 'wool', 'suede', 'polyester', 'fleece'],
     craft: ['embroidery', 'print', 'leather', 'rubber', 'woven', 'foil'],
-    position: ['front', 'left', 'right', 'back', 'underBrim', 'innerBand', 'top'],
     size: ['snap', 'elastic', 'fixed', 'audience'],
-    details: ['label', 'lanyard', 'button', 'eyelets'],
-    scenario: ['team', 'corporate', 'wedding', 'sports', 'streetwear', 'family'],
   };
 
   const colors = [
@@ -91,36 +84,34 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
   );
 
   const renderColorOptions = () => (
-    <div className="space-y-6">
-      <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.color') || 'Hat Color'}</label>
-        <div className="flex flex-wrap gap-3 items-center">
-          {colors.map(c => (
-            <button
-              key={c.name}
-              onClick={() => updateSelection('bodyColor', c.hex)}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-110 shadow-sm ${
-                selections.bodyColor === c.hex ? 'ring-2 ring-offset-2 ring-emerald-500 scale-110' : ''
-              }`}
-              style={{ backgroundColor: c.hex, border: c.name === 'White' ? '1px solid #e4e4e7' : 'none' }}
-              aria-label={c.name}
-            >
-              {selections.bodyColor === c.hex && (
-                <CheckCircle2 className={`w-5 h-5 ${c.name === 'White' ? 'text-zinc-900' : 'text-white'}`} />
-              )}
-            </button>
-          ))}
-          
-          <div className="relative group">
-            <input
-              type="color"
-              value={selections.bodyColor.startsWith('#') ? selections.bodyColor : '#ffffff'}
-              onChange={(e) => updateSelection('bodyColor', e.target.value)}
-              className="w-10 h-10 rounded-full overflow-hidden cursor-pointer border-2 border-white shadow-sm ring-1 ring-zinc-200"
-            />
-            <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-              {t('customizer.customColor') || 'Custom'}
-            </div>
+    <div>
+      <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.color') || 'Hat Color'}</label>
+      <div className="flex flex-wrap gap-3 items-center">
+        {colors.map(c => (
+          <button
+            key={c.name}
+            onClick={() => updateSelection('bodyColor', c.hex)}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-transform hover:scale-110 shadow-sm ${
+              selections.bodyColor === c.hex ? 'ring-2 ring-offset-2 ring-emerald-500 scale-110' : ''
+            }`}
+            style={{ backgroundColor: c.hex, border: c.name === 'White' ? '1px solid #e4e4e7' : 'none' }}
+            aria-label={c.name}
+          >
+            {selections.bodyColor === c.hex && (
+              <CheckCircle2 className={`w-5 h-5 ${c.name === 'White' ? 'text-zinc-900' : 'text-white'}`} />
+            )}
+          </button>
+        ))}
+        
+        <div className="relative group">
+          <input
+            type="color"
+            value={selections.bodyColor.startsWith('#') ? selections.bodyColor : '#ffffff'}
+            onChange={(e) => updateSelection('bodyColor', e.target.value)}
+            className="w-10 h-10 rounded-full overflow-hidden cursor-pointer border-2 border-white shadow-sm ring-1 ring-zinc-200"
+          />
+          <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-zinc-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            {t('customizer.customColor') || 'Custom'}
           </div>
         </div>
       </div>
@@ -129,16 +120,36 @@ export default function Customizer({ selections, updateSelection, onEvaluate }: 
 
   return (
     <div className="max-w-3xl mx-auto">
-      {renderSection('scenario', t('customizer.scenario'), renderGridOptions('scenario', 'scenarios'))}
-      {renderSection('baseStyle', t('customizer.baseStyle'), renderGridOptions('baseStyle', 'styles'))}
-      
-      {renderSection('colors', t('customizer.colors'), renderColorOptions())}
+      {/* Group 1: Style & Color */}
+      {renderSection('group_style', t('customizer.groups.style') || '款式与颜色', (
+        <div className="space-y-8">
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.baseStyle')}</label>
+            {renderGridOptions('baseStyle', 'styles')}
+          </div>
+          {renderColorOptions()}
+        </div>
+      ))}
 
-      {renderSection('material', t('customizer.material'), renderGridOptions('material', 'materials'))}
-      {renderSection('craft', t('customizer.craft'), renderGridOptions('craft', 'crafts'))}
-      {renderSection('position', t('customizer.position'), renderGridOptions('position', 'positions'))}
-      {renderSection('size', t('customizer.size'), renderGridOptions('size', 'sizes'))}
-      
+      {/* Group 2: Material, Craft, Size */}
+      {renderSection('group_craft', t('customizer.groups.craft') || '材质与工艺', (
+        <div className="space-y-8">
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.material')}</label>
+            {renderGridOptions('material', 'materials')}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.craft')}</label>
+            {renderGridOptions('craft', 'crafts')}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-zinc-700 mb-3">{t('customizer.size')}</label>
+            {renderGridOptions('size', 'sizes')}
+          </div>
+        </div>
+      ))}
+
+      {/* Group 3: Personalized Details */}
       <div className="border border-zinc-200 rounded-2xl overflow-hidden bg-white mb-4 shadow-sm">
         <div className="w-full flex items-center justify-between p-5 bg-zinc-50/50 border-b border-zinc-100">
           <span className="font-medium text-zinc-900">{t('customizer.details')}</span>
