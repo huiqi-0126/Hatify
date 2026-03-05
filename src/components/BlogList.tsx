@@ -103,7 +103,7 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
                                 <div className="aspect-[16/10] relative overflow-hidden bg-zinc-100">
                                     {post.image ? (
                                         <img
-                                            src={post.image}
+                                            src={post.image.startsWith('http') ? post.image : `${import.meta.env.BASE_URL || '/'}${post.image.startsWith('/') ? post.image.slice(1) : post.image}`}
                                             alt={post.title}
                                             className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-1000 ease-out"
                                             onError={(e) => {

@@ -40,7 +40,7 @@ export default function BlogPost({ postId, onBack }: BlogPostProps) {
                 <header className="mb-12">
                     {post.image ? (
                         <img
-                            src={post.image}
+                            src={post.image.startsWith('http') ? post.image : `${import.meta.env.BASE_URL || '/'}${post.image.startsWith('/') ? post.image.slice(1) : post.image}`}
                             alt={post.title}
                             className="w-full h-[500px] object-cover rounded-[3rem] shadow-2xl mb-16 border-8 border-white"
                             onError={(e) => {
@@ -67,7 +67,12 @@ export default function BlogPost({ postId, onBack }: BlogPostProps) {
             prose-p:text-[#3F3F46] prose-p:leading-relaxed
             prose-img:rounded-2xl prose-img:shadow-lg prose-img:my-10
             prose-a:text-[#EC4899] prose-a:font-semibold hover:prose-a:underline"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
+                    dangerouslySetInnerHTML={{
+                        __html: post.content.replace(
+                            /src="(?:\/)?blog_content/g,
+                            `src="${import.meta.env.BASE_URL || '/'}blog_content`
+                        )
+                    }}
                 />
 
                 <div className="mt-24 pt-12 border-t border-zinc-200 text-center">

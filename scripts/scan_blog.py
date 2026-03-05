@@ -96,7 +96,7 @@ def extract_blog_data(html_path, folder_name):
                 tag.decompose()
 
         # 资源路径迁移
-        web_rel_base = f"/blog_content/{folder_name}/assets"
+        web_rel_base = f"blog_content/{folder_name}/assets"
         imgs = content_container.find_all('img')
         for img in imgs:
             src = img.get('src', '')
@@ -126,7 +126,7 @@ def extract_blog_data(html_path, folder_name):
         "description": desc_text.strip(),
         "image": image_url,
         "content": content_html,
-        "path": f"/blog_content/{folder_name}"
+        "path": f"blog_content/{folder_name}"
     }
 
 def scan_blog():

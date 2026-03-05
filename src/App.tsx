@@ -18,11 +18,13 @@ export default function App() {
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Basic routing logic for deep links
+    // Basic routing logic for deep links - aware of subdirectories
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, "");
     const path = window.location.pathname;
-    if (path.endsWith('/Contact') || path.endsWith('/Contact/')) {
+
+    if (path.endsWith(base + '/Contact') || path.endsWith(base + '/Contact/')) {
       setView("contact-list");
-    } else if (path.endsWith('/Blog') || path.endsWith('/Blog/')) {
+    } else if (path.endsWith(base + '/Blog') || path.endsWith(base + '/Blog/')) {
       setView("blog");
     } else if (path.includes('/blog/')) {
       const parts = path.split('/');
@@ -35,15 +37,17 @@ export default function App() {
   }, []);
 
   const handleSelectPost = (id: string) => {
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, "");
     setSelectedPostId(id);
     setView("blog-post");
-    window.history.pushState({}, "", `/blog/${id}`);
+    window.history.pushState({}, "", `${base}/blog/${id}`);
   };
 
   const handleBackToBlog = () => {
+    const base = (import.meta.env.BASE_URL || '/').replace(/\/$/, "");
     setView("blog");
     setSelectedPostId(null);
-    window.history.pushState({}, "", "/Blog");
+    window.history.pushState({}, "", `${base}/Blog`);
   };
 
   return (
