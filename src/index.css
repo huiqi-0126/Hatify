@@ -61,10 +61,6 @@ html {
     @apply leading-relaxed;
   }
 
-  .blog-content a {
-    @apply text-emerald-600 font-bold underline decoration-emerald-200 decoration-4 underline-offset-4 hover:decoration-emerald-500 transition-all;
-  }
-
   .blog-content img {
     @apply rounded-[2rem] shadow-2xl my-16 w-full object-cover border-8 border-transparent;
   }
