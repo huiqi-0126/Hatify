@@ -81,6 +81,17 @@ def extract_blog_data(html_path, folder_name):
         for a_tag in content_container.find_all('a'):
             a_tag.decompose()
 
+        # 移除正文开头的重复标题 (第一个 h1)
+        first_h1 = content_container.find('h1')
+        if first_h1:
+            first_h1.decompose()
+            
+        # 移除开头可能存在的元数据（如日期、阅读时间等短文本）
+        for tag in content_container.find_all(['p', 'div', 'span'], recursive=False)[:3]:
+            text = tag.get_text().strip()
+            if text and len(text) < 50: # 很短的通常是元数据
+                tag.decompose()
+
         # 第三轮清理：包含特定营销文字的标签 (Learn more, etc.)
         ban_words = ["Learn more", "Read more", "Contact us", "All posts", "Start your order", "View all", "Table of contents", "Ready to try"]
         for tag in content_container.find_all(True):

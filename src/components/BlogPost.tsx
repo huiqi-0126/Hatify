@@ -69,7 +69,8 @@ export default function BlogPost({ postId, onBack }: BlogPostProps) {
             prose-headings:text-[#18181B] prose-headings:font-bold
             prose-p:text-[#3F3F46] prose-p:leading-relaxed
             prose-img:rounded-2xl prose-img:shadow-lg prose-img:my-10
-            prose-a:text-[#EC4899] prose-a:font-semibold hover:prose-a:underline"
+            prose-a:text-[#EC4899] prose-a:font-semibold hover:prose-a:underline
+            [&_h1:first-of-type]:hidden"
                     dangerouslySetInnerHTML={{
                         __html: post.content.replace(
                             /src="(?:\/)?blog_content/g,
