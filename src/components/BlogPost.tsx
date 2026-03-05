@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import blogData from "../data/blog.json";
 
 interface BlogPostProps {
@@ -9,9 +9,27 @@ interface BlogPostProps {
 export default function BlogPost({ postId, onBack }: BlogPostProps) {
     const post = blogData.find((p) => p.id === postId);
 
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
     useEffect(() => {
         window.scrollTo(0, 0);
+        const toggleVisibility = () => {
+            if (window.scrollY > 500) {
+                setShowScrollTop(true);
+            } else {
+                setShowScrollTop(false);
+            }
+        };
+        window.addEventListener("scroll", toggleVisibility);
+        return () => window.removeEventListener("scroll", toggleVisibility);
     }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+    };
 
     if (!post) {
         return (
@@ -38,21 +56,6 @@ export default function BlogPost({ postId, onBack }: BlogPostProps) {
                 </button>
 
                 <header className="mb-12">
-                    {post.image ? (
-                        <img
-                            src={post.image.startsWith('http') ? post.image : `${import.meta.env.BASE_URL || '/'}${post.image.startsWith('/') ? post.image.slice(1) : post.image}`}
-                            alt={post.title}
-                            className="w-full h-[500px] object-cover rounded-[3rem] shadow-2xl mb-16 border-8 border-white"
-                            onError={(e) => {
-                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=1200&q=80';
-                            }}
-                        />
-                    ) : (
-                        <div className="w-full h-[400px] bg-zinc-900 rounded-[3rem] mb-16 flex items-center justify-center text-white p-12 overflow-hidden relative shadow-2xl">
-                            <span className="text-8xl font-serif font-bold opacity-10 absolute -right-8 -bottom-8 rotate-12">{post.title}</span>
-                            <h1 className="text-5xl font-bold text-center relative z-10 leading-tight">{post.title}</h1>
-                        </div>
-                    )}
                     <h1 className="text-4xl sm:text-5xl font-bold text-[#18181B] leading-tight mb-4">
                         {post.title}
                     </h1>
@@ -84,6 +87,19 @@ export default function BlogPost({ postId, onBack }: BlogPostProps) {
                     </button>
                 </div>
             </div>
+
+            {/* Back to Top Button */}
+            {showScrollTop && (
+                <button
+                    onClick={scrollToTop}
+                    className="fixed bottom-10 right-10 z-50 p-5 bg-emerald-600 text-white rounded-full shadow-2xl hover:bg-emerald-700 transition-all active:scale-90 group"
+                    title="Back to Top"
+                >
+                    <svg className="w-6 h-6 group-hover:-translate-y-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                </button>
+            )}
         </article>
     );
 }

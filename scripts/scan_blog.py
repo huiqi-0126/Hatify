@@ -82,13 +82,26 @@ def extract_blog_data(html_path, folder_name):
             a_tag.decompose()
 
         # 第三轮清理：包含特定营销文字的标签 (Learn more, etc.)
-        ban_words = ["Learn more", "Read more", "Contact us", "All posts", "Start your order", "View all"]
+        ban_words = ["Learn more", "Read more", "Contact us", "All posts", "Start your order", "View all", "Table of contents", "Ready to try"]
         for tag in content_container.find_all(True):
             text = tag.get_text().strip()
+            # 移除包含禁用词的标签
             if any(word.lower() in text.lower() for word in ban_words):
                 if tag.name not in ['body', 'html', 'main', 'article']: # 保护根容器
-                    if len(text) < 50:
+                    if len(text) < 100: # 稍微放宽一点限制以捕捉 "Ready to try Printful?"
                         tag.decompose()
+                        continue
+            
+            # 移除空列表或只有数字的无意义列表项
+            if tag.name in ['li', 'ol', 'ul'] and not text:
+                tag.decompose()
+            elif tag.name == 'li' and text.isdigit():
+                 tag.decompose()
+
+        # 清理空列表容器
+        for list_tag in content_container.find_all(['ol', 'ul']):
+            if not list_tag.get_text().strip():
+                list_tag.decompose()
 
         # 清理侧边栏和额外部分
         for cls_to_remove in ['md:sticky', 'share-links', 'related-articles', 'author-section', 'sidebar']:
@@ -98,19 +111,31 @@ def extract_blog_data(html_path, folder_name):
         # 资源路径迁移
         web_rel_base = f"blog_content/{folder_name}/assets"
         imgs = content_container.find_all('img')
+        
+        local_first_img = ""
         for img in imgs:
             src = img.get('src', '')
             filename = os.path.basename(src)
-            img['src'] = f"{web_rel_base}/{filename}"
+            new_src = f"{web_rel_base}/{filename}"
+            
+            # 检查文件大小，过滤太小的图（如图标、Logo、追踪像素）
+            abs_asset_path = article_assets_dest / filename
+            if abs_asset_path.exists() and abs_asset_path.stat().st_size < 5000:
+                img.decompose()
+                continue
+
+            img['src'] = new_src
             img['style'] = "max-width: 100%; height: auto; border-radius: 24px; margin: 48px 0; display: block;"
             img['class'] = "shadow-2xl"
+            if not local_first_img:
+                local_first_img = new_src
 
-        # 处理封面图
-        if image_url:
+        # 处理封面图：优先使用内容中的第一张图（已本地化且满足大小要求）
+        if local_first_img:
+            image_url = local_first_img
+        elif image_url:
             if "http" not in image_url:
                 image_url = f"{web_rel_base}/{os.path.basename(image_url)}"
-        elif imgs:
-             image_url = imgs[0].get('src')
 
         # 去掉所有干扰属性
         for tag in content_container.find_all(True):
