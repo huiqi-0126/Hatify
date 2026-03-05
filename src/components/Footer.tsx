@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { X, Mail, Copy, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
-export default function Footer({ setView }: { setView?: (view: 'home' | 'contact-list') => void }) {
+export default function Footer({ setView }: { setView?: (view: 'home' | 'contact-list' | 'blog') => void }) {
   const { t } = useTranslation();
   const [modalContent, setModalContent] = useState<{ title: string, url?: string, type: 'iframe' | 'contact' | 'privacy' | 'terms' } | null>(null);
   const [copied, setCopied] = useState(false);
@@ -66,6 +66,18 @@ export default function Footer({ setView }: { setView?: (view: 'home' | 'contact
                   className="text-zinc-600 hover:text-zinc-900 transition-colors"
                 >
                   {t('footer.termsOfService', 'Terms of Service')}
+                </button>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-zinc-300"></div>
+                <button
+                  onClick={() => {
+                    setView?.('blog');
+                    window.scrollTo(0, 0);
+                  }}
+                  className="text-zinc-600 hover:text-zinc-900 transition-colors"
+                >
+                  {t('footer.blog', 'Blog')}
                 </button>
               </li>
             </ul>

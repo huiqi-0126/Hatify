@@ -18,3 +18,39 @@
 html {
   scroll-behavior: smooth;
 }
+
+@layer base {
+  .blog-content h1 {
+    @apply text-4xl font-bold mb-6 mt-12 text-zinc-900;
+  }
+  .blog-content h2 {
+    @apply text-3xl font-bold mb-4 mt-10 text-zinc-900 border-b border-zinc-100 pb-2;
+  }
+  .blog-content h3 {
+    @apply text-2xl font-semibold mb-3 mt-8 text-zinc-800;
+  }
+  .blog-content p {
+    @apply text-lg leading-relaxed mb-6 text-zinc-600;
+  }
+  .blog-content ul {
+    @apply list-disc pl-6 mb-6 space-y-2 text-zinc-600;
+  }
+  .blog-content ol {
+    @apply list-decimal pl-6 mb-6 space-y-2 text-zinc-600;
+  }
+  .blog-content li {
+    @apply text-lg;
+  }
+  .blog-content a {
+    @apply text-emerald-600 font-medium hover:underline;
+  }
+  .blog-content img {
+    @apply rounded-2xl shadow-md my-8 w-full object-cover;
+  }
+  .blog-content strong {
+    @apply font-bold text-zinc-900;
+  }
+  .blog-content blockquote {
+    @apply border-l-4 border-emerald-500 pl-4 italic my-8 text-zinc-700 bg-zinc-50 py-4 pr-4 rounded-r-lg;
+  }
+}

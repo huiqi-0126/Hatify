@@ -34,6 +34,16 @@ export default function Header({ setView, currentView }: HeaderProps) {
           </div>
 
           <div className="flex items-center space-x-4">
+            <button
+              onClick={() => {
+                setView("blog");
+                window.history.pushState({}, "", "/Blog");
+              }}
+              className={`text-sm font-medium transition-colors hover:text-emerald-600 ${currentView === "blog" ? "text-emerald-600 font-bold" : "text-zinc-600"
+                }`}
+            >
+              Blog
+            </button>
             <LanguageSelector />
           </div>
         </div>
