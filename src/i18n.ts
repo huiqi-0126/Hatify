@@ -12,7 +12,7 @@ const resources = {
         "designYourHat": "Design Your Hat Online"
       },
       "gallery": {
-        "title": "Customer Creations",
+        "title": "Custom Leather & PVC Patch Hats",
         "desc": "Get inspired by unique designs created by our community. Click on any hat to see the details.",
         "viewAll": "View All",
         "details": "View Details"
@@ -37,16 +37,16 @@ const resources = {
         "termsOfService": "Terms of Service"
       },
       "hero": {
-        "premium": "Premium Personalized Embroidered Hats",
-        "title1": "Design Your Own",
-        "title2": "Custom Hats",
-        "desc": "Not a template. Your exact design, embroidered on premium custom caps. Personalized hats crafted for you, with no minimum order. Built to last.",
+        "premium": "Premium Custom Patch Hats & Personalized Headwear",
+        "title1": "The Ultimate Destination for",
+        "title2": "Premium Custom Hats",
+        "desc": "Design your own custom hats with premium leather patches, PVC, or embroidery. High-quality personalized headwear with no hidden fees. Shop the best alternative to Lids and Custom Ink today!",
         "start": "Start Designing",
         "howItWorks": "See How It Works",
         "happyHeads": "Over 10,000+ happy heads"
       },
       "preview": {
-        "title": "Design Your Own Hat Online",
+        "title": "Design Your Own: Create Custom Caps Online",
         "desc": "Type your name, choose your style, and preview your personalized hats in real-time. Custom hats no minimum required.",
         "yourText": "Your Text",
         "typography": "Typography Style",
@@ -64,16 +64,16 @@ const resources = {
       },
       "features": {
         "subtitle": "Why Hatify?",
-        "title": "The difference is in the details",
+        "title": "Professional Custom Patch Hats & Headwear Specialist",
         "desc": "We believe custom caps should feel like a premium brand, not a cheap promotional item.",
-        "f1Title": "Real Custom Hats, Not Just Mockups",
-        "f1Desc": "We don't just print your design on a cheap cap. We use high-quality, dense embroidery to bring your personalized embroidered hats to life with texture and depth.",
-        "f2Title": "Premium Materials",
-        "f2Desc": "Crafted from 100% brushed cotton twill or premium wool blends. Our custom hats are built for comfort, durability, and a perfect fit.",
-        "f3Title": "Precision Embroidery",
-        "f3Desc": "State-of-the-art embroidery machines ensure every stitch is perfect. No loose threads, no fading, just crisp, clean designs.",
-        "f4Title": "Built to Last",
-        "f4Desc": "Water-resistant options and reinforced stitching mean your personalized hats will survive the elements and look great for years."
+        "f1Title": "Premium Leather & PVC Patches",
+        "f1Desc": "From custom leather patch hats to durable PVC patches, we bring your vision to life with high-quality materials and craftsmanship.",
+        "f2Title": "Vintage Custom Hats & Caps",
+        "f2Desc": "Looking for that classic look? Our vintage custom caps are built with premium materials for a timeless feel and modern durability.",
+        "f3Title": "Custom Carhartt-Style Beanies",
+        "f3Desc": "Stay warm with our durable custom knit beanies and personalized beanies. The perfect winter essential for your personal style or brand.",
+        "f4Title": "Professional Thread Logic",
+        "f4Desc": "We use advanced thread logic embroidery techniques to ensure every stitch is perfect. Professional personalized hats with no hidden fees and no minimum order."
       },
       "faq": {
         "title": "Frequently Asked Questions",
@@ -253,7 +253,7 @@ const resources = {
         "designYourHat": "设计您的帽子"
       },
       "gallery": {
-        "title": "成交作品",
+        "title": "定制皮革和 PVC 补丁礼帽",
         "desc": "从社区的独特设计中获取灵感。点击任意帽子查看详情。",
         "viewAll": "查看全部",
         "details": "查看详情"
@@ -285,10 +285,10 @@ const resources = {
         "termsOfService": "服务条款"
       },
       "hero": {
-        "premium": "高级定制刺绣",
-        "title1": "设计您的",
-        "title2": "专属帽子",
-        "desc": "拒绝模板化。将您的专属设计刺绣在优质帽子上。为您精心打造，经久耐用。",
+        "premium": "高端定制补丁帽与个性化帽类",
+        "title1": "高端定制帽子的",
+        "title2": "终极目的地",
+        "desc": "设计您自己的定制帽子，提供高级皮革补丁、PVC或刺绣。高品质、个性化，无隐藏费用。立即发现优于 Lids 和 Custom Ink 的品质！",
         "start": "开始设计",
         "howItWorks": "了解制作过程",
         "happyHeads": "超过10,000+位满意顾客"
@@ -312,16 +312,16 @@ const resources = {
       },
       "features": {
         "subtitle": "为什么选择 Hatify？",
-        "title": "细节决定成败",
+        "title": "专业高端定制补丁帽子与帽饰专家",
         "desc": "我们认为定制帽子应该具有高端品牌的质感，而不是廉价的促销品。",
-        "f1Title": "真正的定制帽子，而不仅仅是效果图",
-        "f1Desc": "我们不仅仅是在廉价帽子上印上您的设计。我们使用高品质、高密度的刺绣，通过纹理和深度将您的愿景变为现实。",
-        "f2Title": "优质材料",
-        "f2Desc": "采用100%拉绒棉斜纹布或优质羊毛混纺制成。我们的帽子专为舒适、耐用和完美贴合而打造。",
-        "f3Title": "精密刺绣",
-        "f3Desc": "最先进的刺绣机确保每一针都完美无瑕。没有松散的线头，不褪色，只有清晰、干净的设计。",
-        "f4Title": "经久耐用",
-        "f4Desc": "防水选项和加固缝线意味着您的定制帽子能够抵御恶劣天气，并在未来几年内保持美观。"
+        "f1Title": "高级皮革与 PVC 贴片",
+        "f1Desc": "从定制皮革补丁帽到耐用的 PVC 贴片，我们通过高品质的材料和工艺为您实现愿景。",
+        "f2Title": "复古定制帽子与球帽",
+        "f2Desc": "寻找经典外观？我们的复古定制帽子采用特级材料打造，兼具永恒的质感和现代的耐用性。",
+        "f3Title": "定制 Carhartt 风格冷帽",
+        "f3Desc": "佩戴耐用的定制针织帽展示您的个人魅力。冬季必备，兼具保暖与品牌质感。",
+        "f4Title": "专业 Thread Logic 刺绣",
+        "f4Desc": "我们使用先进的 thread logic 刺绣技术，确保每一针都完美无瑕。专业且无起订量限制。"
       },
       "faq": {
         "title": "常见问题",

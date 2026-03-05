@@ -87,7 +87,7 @@ export default function GallerySection() {
                   >
                     <img
                       src={`https://image-cloud-1318759792.cos.na-siliconvalley.myqcloud.com/${item.path}`}
-                      alt={item.name}
+                      alt={`${item.name} - Custom Patch Hat | Personalized Headwear Design`}
                       className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                       referrerPolicy="no-referrer"

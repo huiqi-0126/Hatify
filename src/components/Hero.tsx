@@ -79,7 +79,7 @@ export default function Hero() {
                   key={i}
                   className="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover"
                   src={`https://picsum.photos/seed/${i}/100/100`}
-                  alt="Customer"
+                  alt={`Customer wearing Hatify personalized custom hat`}
                   referrerPolicy="no-referrer"
                 />
               ))}
