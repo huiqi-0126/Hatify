@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import Database from "better-sqlite3";
+import { exec } from "child_process";
 
 const db = new Database("inquiries.db");
 
@@ -89,6 +90,20 @@ async function startServer() {
       console.error('[Proxy] Error:', error);
       res.status(500).json({ error: "Failed to fetch images from external API" });
     }
+  });
+
+  // Blog scanning endpoint
+  app.post("/api/blog/scan", (req, res) => {
+    console.log("[Blog] Starting manual scan...");
+    exec("python scripts/scan_blog.py", (error, stdout, stderr) => {
+      if (error) {
+        console.error(`[Blog] Scan error: ${error}`);
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      console.log(`[Blog] Scan output: ${stdout}`);
+      if (stderr) console.error(`[Blog] Scan stderr: ${stderr}`);
+      res.json({ success: true, message: stdout });
+    });
   });
 
   // Vite middleware for development

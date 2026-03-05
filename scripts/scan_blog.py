@@ -7,30 +7,9 @@ from pathlib import Path
 
 # 永久存放资源的目录
 PERMANENT_BASE = Path("public/blog_content")
+DATA_FILE = Path("src/data/blog.json")
 
-def clean_text_patterns(html_str):
-    # 彻底删除包含常见营销词汇的标签或文本块
-    patterns = [
-        r'Learn more', 
-        r'Read more', 
-        r'Check it out', 
-        r'Click here', 
-        r'Start your order',
-        r'Contact us',
-        r'View selection',
-        r'All posts',
-        r'More Articles',
-        r'Related articles'
-    ]
-    
-    # 移除 URL (http/https)
-    html_str = re.sub(r'https?://[^\s<>"]+|www\.[^\s<>"]+', '', html_str)
-    
-    # 针对特定的文本模式，如果它们还在 HTML 里，尝试清理
-    # 注意：直接正则替换 HTML 可能会破坏标签结构，所以我们尽量在 BeautifulSoup 层面处理
-    return html_str
-
-def extract_blog_data(html_path, article_id, folder_name):
+def extract_blog_data(html_path, folder_name):
     with open(html_path, 'r', encoding='utf-8') as f:
         soup = BeautifulSoup(f, 'html.parser')
     
@@ -94,30 +73,29 @@ def extract_blog_data(html_path, article_id, folder_name):
             content_container = max(divs, key=lambda d: len(d.find_all('p')))
 
     if content_container:
-        # 1. 第一轮清理：已知标签
+        # Clean up unwanted tags
         for tag in content_container.find_all(['script', 'style', 'nav', 'header', 'footer', 'noscript', 'button', 'form', 'svg']):
             tag.decompose()
         
-        # 2. 第二轮清理：所有 <a> 标签及其文字
+        # 彻底删除所有 <a> 标签及其文字
         for a_tag in content_container.find_all('a'):
             a_tag.decompose()
 
-        # 3. 第三轮清理：包含特定营销文字的标签 (Learn more, etc.)
+        # 第三轮清理：包含特定营销文字的标签 (Learn more, etc.)
         ban_words = ["Learn more", "Read more", "Contact us", "All posts", "Start your order", "View all"]
         for tag in content_container.find_all(True):
             text = tag.get_text().strip()
             if any(word.lower() in text.lower() for word in ban_words):
                 if tag.name not in ['body', 'html', 'main', 'article']: # 保护根容器
-                    # 如果该标签内基本只有这些禁用词，则删除
                     if len(text) < 50:
                         tag.decompose()
 
-        # 4. 清理侧边栏和额外部分
+        # 清理侧边栏和额外部分
         for cls_to_remove in ['md:sticky', 'share-links', 'related-articles', 'author-section', 'sidebar']:
             for tag in content_container.find_all(class_=re.compile(cls_to_remove)):
                 tag.decompose()
 
-        # 5. 资源路径迁移
+        # 资源路径迁移
         web_rel_base = f"/blog_content/{folder_name}/assets"
         imgs = content_container.find_all('img')
         for img in imgs:
@@ -127,19 +105,19 @@ def extract_blog_data(html_path, article_id, folder_name):
             img['style'] = "max-width: 100%; height: auto; border-radius: 24px; margin: 48px 0; display: block;"
             img['class'] = "shadow-2xl"
 
-        # 6. 处理封面图
+        # 处理封面图
         if image_url:
             if "http" not in image_url:
                 image_url = f"{web_rel_base}/{os.path.basename(image_url)}"
         elif imgs:
              image_url = imgs[0].get('src')
 
-        # 7. 去掉所有干扰属性
+        # 去掉所有干扰属性
         for tag in content_container.find_all(True):
             if tag.name not in ['img']:
                 tag.attrs = {}
 
-        # 8. 转换为字符串并进行最后的正则清洗 (清除残留 URL)
+        # 转换为字符串并整理
         content_html = str(content_container)
         content_html = re.sub(r'https?://[^\s<>"]+|www\.[^\s<>"]+', '', content_html)
 
@@ -152,31 +130,57 @@ def extract_blog_data(html_path, article_id, folder_name):
     }
 
 def scan_blog():
-    blog_dir = Path("public/blog")
-    articles = []
+    # 1. 加载现有数据
+    existing_articles = []
+    if DATA_FILE.exists():
+        try:
+            with open(DATA_FILE, "r", encoding="utf-8") as f:
+                existing_articles = json.load(f)
+        except:
+            existing_articles = []
+
+    # 记录现有文件夹名称，避免重复导入
+    existing_folders = {a["folder"] for a in existing_articles}
     
+    # 获取当前最大 ID
+    max_id = 0
+    if existing_articles:
+        max_id = max(int(a["id"]) for a in existing_articles)
+
+    blog_dir = Path("public/blog")
     if not blog_dir.exists():
-        print("Source directory not found, keeping existing data.")
+        print("Source directory (public/blog) not found.")
         return
 
+    # 2. 扫描新文章
     snapshots = sorted(list(blog_dir.glob("**/rendered_snapshot.html")))
+    new_count = 0
     
-    for i, snapshot in enumerate(snapshots):
+    for snapshot in snapshots:
         folder_name = snapshot.parent.name
-        print(f"Deep cleaning and ingesting {folder_name}...")
+        
+        # 如果已经存在，跳过（如果您想强制更新，可以去掉这个判断）
+        if folder_name in existing_folders:
+            print(f"Skipping {folder_name} (already exists).")
+            continue
+            
+        print(f"Ingesting new article: {folder_name}...")
         try:
-            data = extract_blog_data(str(snapshot), str(i + 1), folder_name)
-            data["id"] = str(i + 1)
+            data = extract_blog_data(str(snapshot), folder_name)
+            max_id += 1
+            data["id"] = str(max_id)
             data["folder"] = folder_name
-            articles.append(data)
+            existing_articles.append(data)
+            new_count += 1
         except Exception as e:
             print(f"Error processing {folder_name}: {e}")
             
-    os.makedirs("src/data", exist_ok=True)
-    with open("src/data/blog.json", "w", encoding="utf-8") as f:
-        json.dump(articles, f, indent=2, ensure_ascii=False)
+    # 3. 保存合并后的数据
+    os.makedirs(DATA_FILE.parent, exist_ok=True)
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(existing_articles, f, indent=2, ensure_ascii=False)
     
-    print(f"Total articles deep cleaned: {len(articles)}")
+    print(f"Scan complete. Added {new_count} new articles. Total: {len(existing_articles)}")
 
 if __name__ == "__main__":
     scan_blog()
