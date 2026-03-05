@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
-import ProductDetailModal from './ProductDetailModal';
+
 
 interface ImageItem {
   image_id: string;
@@ -15,7 +15,7 @@ interface ImageItem {
 export default function GallerySection() {
   const { t } = useTranslation();
   const [images, setImages] = useState<ImageItem[]>([]);
-  const [selectedItem, setSelectedItem] = useState<ImageItem | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -72,18 +72,20 @@ export default function GallerySection() {
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-zinc-900"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-h-[800px] overflow-hidden relative">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-h-[1100px] overflow-hidden relative">
             {columnData.map((col, colIndex) => (
               <div key={colIndex} className="flex flex-col gap-4 md:gap-6">
                 {col.map((item) => (
-                  <motion.div
+                  <motion.a
                     key={item.image_id}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: colIndex * 0.1 }}
-                    className="relative group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all"
-                    onClick={() => setSelectedItem(item)}
+                    className="relative block group cursor-pointer rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all"
+                    href={`https://ai.dreambrand.studio/image/detail?image_id=${item.image_id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
                     <img
                       src={`https://image-cloud-1318759792.cos.na-siliconvalley.myqcloud.com/${item.path}`}
@@ -97,7 +99,7 @@ export default function GallerySection() {
                         {t('gallery.details')}
                       </span>
                     </div>
-                  </motion.div>
+                  </motion.a>
                 ))}
               </div>
             ))}
@@ -116,12 +118,7 @@ export default function GallerySection() {
         )}
       </div>
 
-      {selectedItem && (
-        <ProductDetailModal
-          item={selectedItem}
-          onClose={() => setSelectedItem(null)}
-        />
-      )}
+
     </section>
   );
 }

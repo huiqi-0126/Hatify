@@ -2,6 +2,7 @@ import os
 import json
 import re
 import shutil
+import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
 
@@ -73,94 +74,110 @@ def extract_blog_data(html_path, folder_name):
             content_container = max(divs, key=lambda d: len(d.find_all('p')))
 
     if content_container:
-        # Clean up unwanted tags
-        for tag in content_container.find_all(['script', 'style', 'nav', 'header', 'footer', 'noscript', 'button', 'form', 'svg']):
+        # 1. Unwrap noscript tags
+        for noscript in content_container.find_all('noscript'):
+            noscript.unwrap()
+
+        # 2. Clean up unwanted tags (non-content)
+        for tag in content_container.find_all(['script', 'style', 'nav', 'header', 'footer', 'button', 'form', 'svg', 'iframe']):
             tag.decompose()
         
-        # 彻底删除所有 <a> 标签及其文字
+        # 3. Handle links: User wants plain text, no clickable URLs.
+        # We unwrap <a> tags to keep the text BUT remove the link, OR decompose if it's a CTA.
         for a_tag in content_container.find_all('a'):
-            a_tag.decompose()
+            a_text = a_tag.get_text().strip()
+            # If it's a "Read more" style link, usually it's in its own tag, decompose it.
+            ban_words = ["Learn more", "Read more", "Contact us", "All posts", "Start your order", "View all", "Table of contents", "Ready to try", "Get started"]
+            if any(word.lower() in a_text.lower() for word in ban_words) and len(a_text) < 60:
+                a_tag.decompose()
+            else:
+                # Keep the text, remove the link
+                a_tag.unwrap()
 
-        # 移除正文开头的重复标题 (第一个 h1)
-        first_h1 = content_container.find('h1')
-        if first_h1:
-            first_h1.decompose()
-            
-        # 移除开头可能存在的元数据（如日期、阅读时间等短文本）
-        for tag in content_container.find_all(['p', 'div', 'span'], recursive=False)[:3]:
-            text = tag.get_text().strip()
-            if text and len(text) < 50: # 很短的通常是元数据
+        # 4. Remove empty tags
+        for tag in content_container.find_all(['p', 'div', 'span', 'section']):
+            if not tag.get_text().strip() and not tag.find_all('img'):
                 tag.decompose()
 
-        # 第三轮清理：包含特定营销文字的标签 (Learn more, etc.)
-        ban_words = ["Learn more", "Read more", "Contact us", "All posts", "Start your order", "View all", "Table of contents", "Ready to try"]
-        for tag in content_container.find_all(True):
-            text = tag.get_text().strip()
-            # 移除包含禁用词的标签
-            if any(word.lower() in text.lower() for word in ban_words):
-                if tag.name not in ['body', 'html', 'main', 'article']: # 保护根容器
-                    if len(text) < 100: # 稍微放宽一点限制以捕捉 "Ready to try Printful?"
-                        tag.decompose()
-                        continue
-            
-            # 移除空列表或只有数字的无意义列表项
-            if tag.name in ['li', 'ol', 'ul'] and not text:
-                tag.decompose()
-            elif tag.name == 'li' and text.isdigit():
-                 tag.decompose()
-
-        # 清理空列表容器
-        for list_tag in content_container.find_all(['ol', 'ul']):
-            if not list_tag.get_text().strip():
-                list_tag.decompose()
-
-        # 清理侧边栏和额外部分
-        for cls_to_remove in ['md:sticky', 'share-links', 'related-articles', 'author-section', 'sidebar']:
-            for tag in content_container.find_all(class_=re.compile(cls_to_remove)):
-                tag.decompose()
-
-        # 资源路径迁移
+        # 5. Resource migration (images)
         web_rel_base = f"blog_content/{folder_name}/assets"
         imgs = content_container.find_all('img')
         
         local_first_img = ""
         for img in imgs:
-            src = img.get('src', '')
-            filename = os.path.basename(src)
-            new_src = f"{web_rel_base}/{filename}"
+            # Handle lazy loading
+            src = img.get('data-lazy-src') or img.get('data-src') or img.get('data-original') or img.get('src') or ''
             
-            # 检查文件大小，过滤太小的图（如图标、Logo、追踪像素）
-            abs_asset_path = article_assets_dest / filename
-            if abs_asset_path.exists() and abs_asset_path.stat().st_size < 5000:
+            if not src or src.startswith('data:'):
                 img.decompose()
                 continue
 
-            img['src'] = new_src
-            img['style'] = "max-width: 100%; height: auto; border-radius: 24px; margin: 48px 0; display: block;"
-            img['class'] = "shadow-2xl"
+            # Skip tracking pixels
+            filename = os.path.basename(src.split('?')[0])
+            if not filename or any(px in filename.lower() for px in ['pixel', 'tracking', 'ads']):
+                img.decompose()
+                continue
+                
+            abs_asset_path = article_assets_dest / filename
+            
+            # Download external
+            if src.startswith('http'):
+                if not abs_asset_path.exists():
+                    try:
+                        print(f"  Downloading external asset: {src}")
+                        resp = requests.get(src, timeout=15, headers={
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+                        })
+                        if resp.status_code == 200:
+                            with open(abs_asset_path, 'wb') as f_out:
+                                f_out.write(resp.content)
+                        else:
+                            print(f"  Failed (Status {resp.status_code})")
+                    except Exception as e:
+                        print(f"  Download error: {e}")
+            
+            # Size filter (1KB)
+            if abs_asset_path.exists() and abs_asset_path.stat().st_size < 1000:
+                print(f"  Filtering small asset: {filename}")
+                img.decompose()
+                continue
+
+            new_src = f"{web_rel_base}/{filename}"
+            # Set cleaned attributes
+            img.attrs = {
+                'src': new_src,
+                'alt': img.get('alt', ''),
+                'style': "max-width: 100%; height: auto; border-radius: 24px; margin: 48px 0; display: block;",
+                'class': "shadow-2xl"
+            }
             if not local_first_img:
                 local_first_img = new_src
 
-        # 处理封面图：优先使用内容中的第一张图（已本地化且满足大小要求）
-        if local_first_img:
-            image_url = local_first_img
-        elif image_url:
-            if "http" not in image_url:
-                image_url = f"{web_rel_base}/{os.path.basename(image_url)}"
-
-        # 去掉所有干扰属性
+        # 6. Final Sanitization: Clean up remaining attributes, but keep structure
+        allowed_tags = ['div', 'section', 'article', 'main', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'img', 'br', 'b', 'strong', 'i', 'em', 'blockquote']
         for tag in content_container.find_all(True):
-            if tag.name not in ['img']:
-                tag.attrs = {}
+            if tag.name not in allowed_tags:
+                tag.unwrap() # Keep content, remove tag
+            elif tag.name != 'img':
+                tag.attrs = {} # Clean attributes for text tags
 
-        # 转换为字符串并整理
+        # 7. Convert to HTML string and remove leftover URLs from text
         content_html = str(content_container)
-        content_html = re.sub(r'https?://[^\s<>"]+|www\.[^\s<>"]+', '', content_html)
+        
+        # Use a more careful regex or better yet, another BeautifulSoup pass to remove URLs from text nodes only
+        temp_soup = BeautifulSoup(content_html, 'html.parser')
+        url_pattern = re.compile(r'https?://[^\s<>"]+|www\.[^\s<>"]+')
+        for text_node in temp_soup.find_all(text=True):
+            if text_node.parent.name != 'a': # Just to be safe
+                new_text = url_pattern.sub('', text_node)
+                text_node.replace_with(new_text)
+        
+        content_html = str(temp_soup)
 
     return {
         "title": title_text.strip() or "Untitled Article",
         "description": desc_text.strip(),
-        "image": image_url,
+        "image": image_url or local_first_img,
         "content": content_html,
         "path": f"blog_content/{folder_name}"
     }
