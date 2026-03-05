@@ -42,6 +42,7 @@ export default function App() {
 
   const handleBackToBlog = () => {
     setView("blog");
+    setSelectedPostId(null);
     window.history.pushState({}, "", "/Blog");
   };
 

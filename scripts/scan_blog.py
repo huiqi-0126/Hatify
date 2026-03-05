@@ -38,9 +38,9 @@ def extract_blog_data(html_path):
     
     # List of potential containers in order of preference
     potential_selectors = [
+        'div.rich-text',
         'article',
         'main',
-        'div.rich-text',
         'div.prose',
         'div.content',
         'div#content'
@@ -61,16 +61,20 @@ def extract_blog_data(html_path):
             break
 
     if not content_container:
-        # Fallback: find the div with most paragraphs
         divs = soup.find_all('div')
         if divs:
             content_container = max(divs, key=lambda d: len(d.find_all('p')))
 
     if content_container:
         # Clean up
-        for tag in content_container.find_all(['script', 'style', 'nav', 'header', 'footer', 'noscript']):
+        for tag in content_container.find_all(['script', 'style', 'nav', 'header', 'footer', 'noscript', 'button', 'form']):
             tag.decompose()
         
+        # Also remove potential author sidebars or social shares
+        for cls_to_remove in ['md:sticky', 'share-links', 'related-articles', 'author-section']:
+            for tag in content_container.find_all(class_=re.compile(cls_to_remove)):
+                tag.decompose()
+
         rel_base = "/" + str(Path(html_path).parent.relative_to(Path("public"))).replace("\\", "/")
         
         imgs = content_container.find_all('img')
@@ -84,19 +88,18 @@ def extract_blog_data(html_path):
                 elif not src.startswith(('http', '/')):
                     img['src'] = rel_base + "/" + src
             
-            # Remove complex styles that might break layout
-            if img.get('style'):
-                img['style'] = "max-width: 100%; height: auto; border-radius: 12px; margin: 24px 0;"
-            img['class'] = "rounded-2xl shadow-md my-8 w-full object-cover"
+            # Remove complex styles
+            img['style'] = "max-width: 100%; height: auto; border-radius: 24px; margin: 48px 0; display: block;"
+            img['class'] = "shadow-2xl"
 
-        # Fallback for cover image if not found in meta
+        # Fallback for cover image
         if not image_url and imgs:
             image_url = imgs[0].get('src')
 
-        # Remove empty tags
-        for p in content_container.find_all('p'):
-            if not p.get_text().strip() and not p.find_all('img'):
-                p.decompose()
+        # Standardize HTML: remove original classes to avoid CSS pollution
+        for tag in content_container.find_all(True):
+            if tag.name not in ['img', 'a']:
+                tag.attrs = {}
 
         content_html = str(content_container)
 
@@ -116,7 +119,6 @@ def scan_blog():
         print("Blog directory not found!")
         return
 
-    # Sort to keep numeric IDs consistent
     snapshots = sorted(list(blog_dir.glob("**/rendered_snapshot.html")))
     
     for i, snapshot in enumerate(snapshots):
@@ -124,7 +126,7 @@ def scan_blog():
         print(f"Processing {folder_name}...")
         try:
             data = extract_blog_data(str(snapshot))
-            data["id"] = str(i + 1) # Numeric ID
+            data["id"] = str(i + 1)
             data["folder"] = folder_name
             articles.append(data)
         except Exception as e:

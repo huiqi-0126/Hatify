@@ -20,37 +20,60 @@ html {
 }
 
 @layer base {
+  .blog-content {
+    @apply font-sans max-w-3xl mx-auto;
+  }
+
   .blog-content h1 {
-    @apply text-4xl font-bold mb-6 mt-12 text-zinc-900;
+    @apply text-5xl font-extrabold mb-10 mt-20 text-zinc-900 tracking-tight leading-tight;
   }
+
   .blog-content h2 {
-    @apply text-3xl font-bold mb-4 mt-10 text-zinc-900 border-b border-zinc-100 pb-2;
+    @apply text-3xl font-bold mb-6 mt-16 text-zinc-900 border-l-4 border-emerald-500 pl-6;
   }
+
   .blog-content h3 {
-    @apply text-2xl font-semibold mb-3 mt-8 text-zinc-800;
+    @apply text-2xl font-bold mb-4 mt-12 text-zinc-800 tracking-tight;
   }
+
   .blog-content p {
-    @apply text-lg leading-relaxed mb-6 text-zinc-600;
+    @apply text-xl leading-[1.8] mb-8 text-zinc-600 font-medium;
   }
+
   .blog-content ul {
-    @apply list-disc pl-6 mb-6 space-y-2 text-zinc-600;
+    @apply list-none pl-0 mb-10 space-y-4 text-zinc-600;
   }
+
+  .blog-content ul li {
+    @apply relative pl-8 text-xl leading-relaxed;
+  }
+
+  .blog-content ul li::before {
+    content: "→";
+    @apply absolute left-0 text-emerald-500 font-black;
+  }
+
   .blog-content ol {
-    @apply list-decimal pl-6 mb-6 space-y-2 text-zinc-600;
+    @apply list-decimal pl-6 mb-10 space-y-4 text-zinc-600 text-xl;
   }
+
   .blog-content li {
-    @apply text-lg;
+    @apply leading-relaxed;
   }
+
   .blog-content a {
-    @apply text-emerald-600 font-medium hover:underline;
+    @apply text-emerald-600 font-bold underline decoration-emerald-200 decoration-4 underline-offset-4 hover:decoration-emerald-500 transition-all;
   }
+
   .blog-content img {
-    @apply rounded-2xl shadow-md my-8 w-full object-cover;
+    @apply rounded-[2rem] shadow-2xl my-16 w-full object-cover border-8 border-transparent;
   }
+
   .blog-content strong {
-    @apply font-bold text-zinc-900;
+    @apply font-black text-zinc-900;
   }
+
   .blog-content blockquote {
-    @apply border-l-4 border-emerald-500 pl-4 italic my-8 text-zinc-700 bg-zinc-50 py-4 pr-4 rounded-r-lg;
+    @apply border-l-8 border-zinc-900 pl-10 italic my-12 text-zinc-800 bg-zinc-50 py-10 pr-10 rounded-r-3xl text-2xl leading-relaxed;
   }
 }

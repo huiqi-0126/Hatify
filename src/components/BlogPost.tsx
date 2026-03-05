@@ -38,12 +38,20 @@ export default function BlogPost({ postId, onBack }: BlogPostProps) {
                 </button>
 
                 <header className="mb-12">
-                    {post.image && (
+                    {post.image ? (
                         <img
                             src={post.image}
                             alt={post.title}
-                            className="w-full h-[400px] object-cover rounded-3xl shadow-xl mb-12"
+                            className="w-full h-[500px] object-cover rounded-[3rem] shadow-2xl mb-16 border-8 border-white"
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=1200&q=80';
+                            }}
                         />
+                    ) : (
+                        <div className="w-full h-[400px] bg-zinc-900 rounded-[3rem] mb-16 flex items-center justify-center text-white p-12 overflow-hidden relative shadow-2xl">
+                            <span className="text-8xl font-serif font-bold opacity-10 absolute -right-8 -bottom-8 rotate-12">{post.title}</span>
+                            <h1 className="text-5xl font-bold text-center relative z-10 leading-tight">{post.title}</h1>
+                        </div>
                     )}
                     <h1 className="text-4xl sm:text-5xl font-bold text-[#18181B] leading-tight mb-4">
                         {post.title}
