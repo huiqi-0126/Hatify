@@ -95,7 +95,7 @@ async function startServer() {
   // Blog scanning endpoint
   app.post("/api/blog/scan", (req, res) => {
     console.log("[Blog] Starting manual scan...");
-    exec("python scripts/scan_blog.py", (error, stdout, stderr) => {
+    exec("python scripts/scan_blog.py && python scripts/score_blogs.py", (error, stdout, stderr) => {
       if (error) {
         console.error(`[Blog] Scan error: ${error}`);
         return res.status(500).json({ success: false, error: error.message });

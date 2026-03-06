@@ -11,8 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set up Gemini
-API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyD-_EHQl6jeaSanb-7oisf5wnTESCtVcU4")
-genai.configure(api_key=API_KEY)
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 PERMANENT_BASE = Path("public/blog_content")
 DATA_FILE = Path("src/data/blog.json")

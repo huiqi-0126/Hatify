@@ -10,10 +10,22 @@ interface BlogListProps {
 export default function BlogList({ onSelectPost }: BlogListProps) {
     const { t } = useTranslation();
     const [isScanning, setIsScanning] = useState(false);
-    const [visibleCount, setVisibleCount] = useState(6);
+    const [visibleCount, setVisibleCount] = useState(() => {
+        const saved = sessionStorage.getItem('blogVisibleCount');
+        return saved ? parseInt(saved) : 6;
+    });
     const [showScrollTop, setShowScrollTop] = useState(false);
 
     useEffect(() => {
+        const savedScroll = sessionStorage.getItem('blogScrollY');
+        if (savedScroll) {
+            // Wait slightly for layout to settle
+            setTimeout(() => {
+                window.scrollTo({ top: parseInt(savedScroll), behavior: 'auto' });
+                sessionStorage.removeItem('blogScrollY');
+            }, 100);
+        }
+
         const toggleVisibility = () => {
             if (window.scrollY > 500) {
                 setShowScrollTop(true);
@@ -25,11 +37,20 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
         return () => window.removeEventListener("scroll", toggleVisibility);
     }, []);
 
+    useEffect(() => {
+        sessionStorage.setItem('blogVisibleCount', visibleCount.toString());
+    }, [visibleCount]);
+
     const scrollToTop = () => {
         window.scrollTo({
             top: 0,
             behavior: "smooth"
         });
+    };
+
+    const handleSelectPost = (id: string) => {
+        sessionStorage.setItem('blogScrollY', window.scrollY.toString());
+        onSelectPost(id);
     };
 
     const handleScan = async () => {
@@ -49,8 +70,9 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
         }
     };
 
-    const hasMore = visibleCount < blogData.length;
-    const currentPosts = blogData.slice(0, visibleCount);
+    const filteredPosts = blogData.filter((post: any) => post.show !== false);
+    const hasMore = visibleCount < filteredPosts.length;
+    const currentPosts = filteredPosts.slice(0, visibleCount);
 
     return (
         <section className="py-24 bg-[#FAFAFA] relative">
@@ -86,7 +108,7 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     <AnimatePresence mode="popLayout">
-                        {currentPosts.map((post, index) => (
+                        {(currentPosts as any[]).map((post, index) => (
                             <motion.div
                                 key={post.id}
                                 layout
@@ -98,7 +120,7 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
                                     delay: (index % 6) * 0.05
                                 }}
                                 className="group bg-white rounded-[2.5rem] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)] transition-all duration-700 cursor-pointer border border-zinc-100 flex flex-col h-full hover:-translate-y-2"
-                                onClick={() => onSelectPost(post.id)}
+                                onClick={() => handleSelectPost(post.id)}
                             >
                                 <div className="aspect-[16/10] relative overflow-hidden bg-zinc-100">
                                     {post.image ? (
@@ -117,14 +139,21 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
                                         </div>
                                     )}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
                                 </div>
                                 <div className="p-10 flex-grow flex flex-col">
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <span className="px-4 py-1.5 bg-zinc-900 text-white text-[10px] font-bold uppercase tracking-[0.2em] rounded-full">
-                                            Article
-                                        </span>
-                                        <span className="text-zinc-400 text-xs font-medium tracking-wide">
-                                            5 MIN READ
+                                    <div className="flex flex-wrap items-center gap-2 mb-6">
+                                        {post.tags ? post.tags.map((tag: string) => (
+                                            <span key={tag} className="px-3 py-1 bg-zinc-900 text-white text-[9px] font-black uppercase tracking-[0.1em] rounded-full">
+                                                {tag}
+                                            </span>
+                                        )) : (
+                                            <span className="px-3 py-1 bg-zinc-900 text-white text-[9px] font-black uppercase tracking-[0.1em] rounded-full">
+                                                Article
+                                            </span>
+                                        )}
+                                        <span className="ml-auto text-zinc-400 text-[10px] font-bold tracking-widest uppercase">
+                                            {post.date || '2024-03-06'}
                                         </span>
                                     </div>
                                     <h3 className="text-2xl font-bold text-zinc-900 mb-4 line-clamp-2 leading-tight group-hover:text-emerald-600 transition-colors duration-300">
