@@ -153,7 +153,7 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
                                             </span>
                                         )}
                                         <span className="ml-auto text-zinc-400 text-[10px] font-bold tracking-widest uppercase">
-                                            {post.date || '2024-03-06'}
+                                            {post.from_folder_date || post.date || '2026-03-09'}
                                         </span>
                                     </div>
                                     <h3 className="text-2xl font-bold text-zinc-900 mb-4 line-clamp-2 leading-tight group-hover:text-emerald-600 transition-colors duration-300">
