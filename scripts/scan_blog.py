@@ -255,11 +255,29 @@ def scan_blog():
         except Exception as e:
             print(f"Error processing {folder_name}: {e}")
             
+    # Deduplicate by title before saving
+    final_articles = []
+    seen_titles = set()
+    
+    # Sort by ID or date to keep the "first" or "best" one if needed, 
+    # but here we'll just keep the first one we encounter in the existing list.
+    for art in existing_articles:
+        title = art.get("title", "").strip()
+        if not title:
+            final_articles.append(art)
+            continue
+            
+        if title not in seen_titles:
+            seen_titles.add(title)
+            final_articles.append(art)
+        else:
+            print(f"  Removing duplicate article by title: {title} (Folder: {art.get('folder')})")
+            
     os.makedirs(DATA_FILE.parent, exist_ok=True)
     with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(existing_articles, f, indent=2, ensure_ascii=False)
+        json.dump(final_articles, f, indent=2, ensure_ascii=False)
     
-    print(f"Scan complete. Added {new_count} new/updated articles. Total: {len(existing_articles)}")
+    print(f"Scan complete. Added {new_count} new/updated articles. Total: {len(final_articles)}")
 
 if __name__ == "__main__":
     scan_blog()
