@@ -160,7 +160,7 @@ def extract_blog_data(html_path, folder_name):
         }
         if not local_first_img:
             local_first_img = new_src
-
+    
     # Finally, remove any leftover URLs in text nodes (just to be safe)
     content_str = str(soup_final)
     url_pattern = re.compile(r'https?://[^\s<>"]+|www\.[^\s<>"]+')
@@ -195,22 +195,63 @@ def scan_blog():
         print("Source directory (public/blog) not found.")
         return
 
+    # Pattern: public/blog/YYYY-M-D/article_folder/rendered_snapshot.html
     snapshots = sorted(list(blog_dir.glob("**/rendered_snapshot.html")))
     new_count = 0
     
+    # Get today's date in YYYY-M-D format (matching the folder structure)
+    from datetime import datetime
+    now = datetime.now()
+    today_str = f"{now.year}-{now.month}-{now.day}"
+
     for snapshot in snapshots:
+        # snapshot.parent is article_folder
+        # snapshot.parent.parent.name should be the date folder (e.g., 2026-3-6)
         folder_name = snapshot.parent.name
-        if folder_name in existing_folders:
+        date_folder = snapshot.parent.parent.name
+        
+        # Incremental Scan Rule:
+        # 1. If folder is OLD and already in JSON, do NOTHING.
+        # 2. If folder is TODAY's, always process (this will wipe old score and trigger re-score).
+        if folder_name in existing_folders and date_folder != today_str:
             continue
             
-        print(f"Ingesting new article: {folder_name}...")
+        print(f"Processing: {date_folder}/{folder_name}...")
         try:
             data = extract_blog_data(str(snapshot), folder_name)
-            max_id += 1
-            data["id"] = str(max_id)
-            data["folder"] = folder_name
-            existing_articles.append(data)
-            new_count += 1
+            data["from_folder_date"] = date_folder # Track where it came from
+            
+            # Use date from directory as the default publication date
+            if re.match(r'\d{4}-\d{1,2}-\d{1,2}', date_folder):
+                data["date"] = date_folder
+            
+            found = False
+            for i, art in enumerate(existing_articles):
+                if art["folder"] == folder_name:
+                    # WE WIPE EVERYTHING EXCEPT CORE FIELDS
+                    # This ensures score_blogs.py sees no 'score' and runs AI
+                    new_art = {
+                        "id": art["id"],
+                        "folder": folder_name,
+                        "title": data["title"],
+                        "description": data["description"],
+                        "image": data["image"],
+                        "content": data["content"],
+                        "path": data["path"],
+                        "date": data.get("date", today_str),
+                        "from_folder_date": date_folder
+                    }
+                    existing_articles[i] = new_art
+                    found = True
+                    break
+            
+            if not found:
+                max_id += 1
+                data["id"] = str(max_id)
+                data["folder"] = folder_name
+                existing_articles.append(data)
+                new_count += 1
+                
         except Exception as e:
             print(f"Error processing {folder_name}: {e}")
             
@@ -218,7 +259,7 @@ def scan_blog():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(existing_articles, f, indent=2, ensure_ascii=False)
     
-    print(f"Scan complete. Added {new_count} new articles. Total: {len(existing_articles)}")
+    print(f"Scan complete. Added {new_count} new/updated articles. Total: {len(existing_articles)}")
 
 if __name__ == "__main__":
     scan_blog()

@@ -128,18 +128,33 @@ def process_scoring():
     with open(DATA_FILE, "r", encoding="utf-8") as f:
         articles = json.load(f)
 
+    now = datetime.now()
+    # Normalize today's date formats for comparison
+    today_v1 = now.strftime("%Y-%m-%d")
+    today_v2 = f"{now.year}-{now.month}-{now.day}"
+
     updated_articles = []
-    print(f"Scoring {len(articles)} articles and extracting tags/dates...")
+    print(f"Incremental Scoring (Threshold: 80):")
     
     for art in articles:
+        # Rule: Only call AI if 'score' is missing. 
+        # scan_blog.py ensures that today's articles or new ones lack the 'score' field.
+        if "score" in art:
+            print(f"  Skipping AI for: {art.get('title', '')[:40]}... (Using existing score: {art['score']})")
+            art["show"] = art["score"] > 80
+            updated_articles.append(art)
+            continue
+
+        # Score new or refreshed articles
+        print(f"  Scoring New/Refreshed: {art.get('title', '')[:40]}...")
         score, reasoning, s_type, tags, date = score_article(art.get("title", ""), art.get("description", ""), art.get("content", ""))
         art["score"] = score
         art["reasoning"] = reasoning
         art["scoring_type"] = s_type
         art["tags"] = tags
         art["date"] = date
-        art["show"] = score >= 50
-        print(f"    Score: {score} ({s_type}) | Tags: {', '.join(tags)} | Date: {date} -> Show: {art['show']}")
+        art["show"] = score > 80
+        print(f"    Result: {score} ({s_type}) -> Show: {art['show']}")
         updated_articles.append(art)
             
     with open(DATA_FILE, "w", encoding="utf-8") as f:
