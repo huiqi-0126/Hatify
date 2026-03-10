@@ -21,21 +21,13 @@ export default function GallerySection() {
   useEffect(() => {
     const fetchImages = async () => {
       try {
-        const res = await fetch('https://ai.dreambrand.studio/api/global/images', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            "sort": "rand",
-            "tabType": "images",
-            "category_id": "61",
-            "filter_type": 0,
-            "current": 1,
-            "pageSize": 20
-          })
-        });
+        // Fetch from local metadata file instead of external API proxy
+        const res = await fetch('/gallery/images.json');
         const data = await res.json();
         if (data?.data?.list) {
-          setImages(data.data.list);
+          // Shuffle the list for random display on refresh
+          const shuffled = [...data.data.list].sort(() => Math.random() - 0.5);
+          setImages(shuffled.slice(0, 24)); // Display a subset of 24 images
         }
       } catch (error) {
         console.error('Failed to fetch images:', error);
@@ -88,7 +80,7 @@ export default function GallerySection() {
                     rel="noopener noreferrer"
                   >
                     <img
-                      src={`https://image-cloud-1318759792.cos.na-siliconvalley.myqcloud.com/${item.path}`}
+                      src={`/gallery/${item.name}`}
                       alt={`${item.name} - Custom Patch Hat | Personalized Headwear Design`}
                       className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
