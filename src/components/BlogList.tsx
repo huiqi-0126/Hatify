@@ -70,7 +70,42 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
         }
     };
 
-    const filteredPosts = blogData.filter((post: any) => post.show !== false);
+    const [galleryImages, setGalleryImages] = useState<string[]>([]);
+
+    useEffect(() => {
+        const loadGallery = async () => {
+            try {
+                const base = import.meta.env.BASE_URL || '/';
+                const res = await fetch(`${base}gallery/images.json`);
+                const data = await res.json();
+                if (data?.data?.list) {
+                    setGalleryImages(data.data.list.map((item: any) => item.name));
+                }
+            } catch (err) {
+                console.error("Failed to load gallery for fallback images:", err);
+            }
+        };
+        loadGallery();
+    }, []);
+
+    const getFallbackImage = (id: string | number) => {
+        console.log(`==========`, id);
+        if (galleryImages.length === 0) return `${import.meta.env.BASE_URL || '/'}gallery/23762624443471877.png`;
+
+        // Ensure id is a string for hashing
+        const idStr = String(id);
+        const hash = idStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const index = hash % galleryImages.length;
+        return `${import.meta.env.BASE_URL || '/'}gallery/${galleryImages[index]}`;
+    };
+
+    const filteredPosts = [...blogData]
+        .sort((a, b) => {
+            const dateStrA = a.date || a.from_folder_date || '2000-01-01';
+            const dateStrB = b.date || b.from_folder_date || '2000-01-01';
+            return new Date(dateStrB).getTime() - new Date(dateStrA).getTime();
+        })
+        .filter((post: any) => post.show !== false);
     const hasMore = visibleCount < filteredPosts.length;
     const currentPosts = filteredPosts.slice(0, visibleCount);
 
@@ -123,23 +158,34 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
                                 onClick={() => handleSelectPost(post.id)}
                             >
                                 <div className="aspect-[16/10] relative overflow-hidden bg-zinc-100">
-                                    {post.image ? (
-                                        <img
-                                            src={post.image.startsWith('http') ? post.image : `${import.meta.env.BASE_URL || '/'}${post.image.startsWith('/') ? post.image.slice(1) : post.image}`}
-                                            alt={post.title}
-                                            className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-1000 ease-out"
-                                            onError={(e) => {
-                                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1521369909029-2afed882baee?auto=format&fit=crop&w=800&q=80';
-                                            }}
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full flex items-center justify-center bg-zinc-900 text-white p-8 overflow-hidden relative">
-                                            <span className="text-5xl font-serif font-bold opacity-10 absolute -right-4 -bottom-4 rotate-12">{post.title}</span>
-                                            <span className="text-xl font-bold tracking-tight text-center relative z-10">{post.title}</span>
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <img
+                                        src={(() => {
+                                            if (post.image) {
+                                                if (post.image.startsWith('http')) return post.image;
+                                                // Handle potential double slashes or missing slashes
+                                                const cleanPath = post.image.startsWith('/') ? post.image.slice(1) : post.image;
+                                                return `${window.location.origin}${import.meta.env.BASE_URL || '/'}${cleanPath}`;
+                                            }
+                                            return getFallbackImage(post.id);
+                                        })()}
+                                        alt={post.title}
+                                        className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-1000 ease-out"
+                                        onError={(e) => {
+                                            const target = e.target as HTMLImageElement;
+                                            const fallbackUrl = getFallbackImage(post.id);
 
+                                            // Ensure absolute path for comparison to prevent infinite loops
+                                            const absoluteFallback = fallbackUrl.startsWith('http')
+                                                ? fallbackUrl
+                                                : `${window.location.origin}${fallbackUrl}`;
+
+                                            if (target.src === absoluteFallback) return;
+
+                                            console.warn(`Image load failed for post ${post.id}, trying fallback: ${absoluteFallback}`);
+                                            target.src = absoluteFallback;
+                                        }}
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 </div>
                                 <div className="p-10 flex-grow flex flex-col">
                                     <div className="flex flex-wrap items-center gap-2 mb-6">
