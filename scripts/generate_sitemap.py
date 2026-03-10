@@ -21,6 +21,7 @@ def generate_sitemap():
         return
 
     # 2. Start building sitemap XML content
+    # Use ISO 8601 format (YYYY-MM-DD) as required by Google
     now = datetime.now().strftime("%Y-%m-%d")
     
     xml_content = [
