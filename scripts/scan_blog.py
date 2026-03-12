@@ -234,6 +234,7 @@ def scan_blog():
                         "id": art["id"],
                         "folder": folder_name,
                         "title": data["title"],
+                        "original_title": art.get("original_title", data["title"]),
                         "description": data["description"],
                         "image": data["image"],
                         "content": data["content"],

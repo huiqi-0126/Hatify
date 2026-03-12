@@ -4,6 +4,10 @@ import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import Database from "better-sqlite3";
 import { exec } from "child_process";
+import fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const db = new Database("inquiries.db");
 
@@ -30,6 +34,79 @@ try {
 }
 
 
+
+// Helper to inject SEO meta tags into HTML
+async function injectSEOMeta(html: string, postId: string) {
+  try {
+    const blogDataRaw = fs.readFileSync(path.resolve(__dirname, "src/data/blog.json"), "utf-8");
+    const blogData = JSON.parse(blogDataRaw);
+    const post = blogData.find((p: any) => String(p.id) === postId);
+
+    if (post) {
+      const title = `${post.title} | Hatify`;
+      const description = post.description.replace(/"/g, '&quot;');
+      const url = `https://customhat.top/blog/${postId}`;
+      const image = post.image.startsWith('http') ? post.image : `https://customhat.top/${post.image}`;
+
+      // 1. Replace Title
+      html = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${title}</title>`);
+
+      // 2. Replace/Inject Meta Description
+      const descTag = `<meta name="description" content="${description}" />`;
+      if (html.match(/<meta\s+name="description"[\s\S]*?>/i)) {
+        html = html.replace(/<meta\s+name="description"[\s\S]*?>/i, descTag);
+      } else {
+        html = html.replace("</head>", `${descTag}\n</head>`);
+      }
+
+      // 3. Replace/Inject Open Graph tags
+      const ogTags = [
+        { property: 'og:title', content: title },
+        { property: 'og:description', content: description },
+        { property: 'og:url', content: url },
+        { property: 'og:image', content: image },
+        { property: 'og:type', content: 'article' }
+      ];
+
+      ogTags.forEach(tag => {
+        const regex = new RegExp(`<meta\\s+property="${tag.property}"[\\s\\S]*?>`, 'i');
+        const newTag = `<meta property="${tag.property}" content="${tag.content}" />`;
+        if (html.match(regex)) {
+          html = html.replace(regex, newTag);
+        } else {
+          html = html.replace("</head>", `${newTag}\n</head>`);
+        }
+      });
+
+      // 4. Replace/Inject Twitter tags
+      const twitterTags = [
+        { name: 'twitter:title', content: title },
+        { name: 'twitter:description', content: description },
+        { name: 'twitter:image', content: image }
+      ];
+
+      twitterTags.forEach(tag => {
+        const regex = new RegExp(`<meta\\s+name="${tag.name}"[\\s\\S]*?>`, 'i');
+        const newTag = `<meta name="${tag.name}" content="${tag.content}" />`;
+        if (html.match(regex)) {
+          html = html.replace(regex, newTag);
+        } else {
+          html = html.replace("</head>", `${newTag}\n</head>`);
+        }
+      });
+
+      // 5. Inject/Update H1 for SEO tools that check body content
+      // Keep it hidden to avoid flashing during hydration
+      const h1Match = html.match(/<h1[\s\S]*?>([\s\S]*?)<\/h1>/i);
+      if (h1Match) {
+         html = html.replace(/<h1[\s\S]*?>[\s\S]*?<\/h1>/i, `<h1 style="position: absolute; left: -9999px;">${post.title}</h1>`);
+      }
+    }
+  } catch (error) {
+    console.error("SEO Injection failed:", error);
+  }
+  return html;
+}
 
 async function startServer() {
   const app = express();
@@ -106,12 +183,43 @@ async function startServer() {
     });
   });
 
+  // Handle blog pages specifically for SEO injection (Dev + Prod)
+  app.get("/blog/:id", async (req, res, next) => {
+    const postId = req.params.id;
+    
+    if (process.env.NODE_ENV !== "production") {
+      try {
+        // Dev mode: use vite to transform index.html
+        const vite = (app as any).viteInstance;
+        if (!vite) return next();
+        
+        let template = fs.readFileSync(path.resolve(__dirname, "index.html"), "utf-8");
+        template = await vite.transformIndexHtml(req.originalUrl, template);
+        const html = await injectSEOMeta(template, postId);
+        return res.status(200).set({ "Content-Type": "text/html" }).end(html);
+      } catch (e) {
+        next(e);
+      }
+    } else {
+      // Production mode: use built index.html
+      const indexPath = path.resolve(__dirname, "dist", "index.html");
+      try {
+        const template = fs.readFileSync(indexPath, "utf-8");
+        const html = await injectSEOMeta(template, postId);
+        return res.status(200).set({ "Content-Type": "text/html" }).end(html);
+      } catch (e) {
+        res.sendFile(indexPath);
+      }
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
+    (app as any).viteInstance = vite; // Store instance for route access
     app.use(vite.middlewares);
   } else {
     const distPath = path.resolve(__dirname, "dist");

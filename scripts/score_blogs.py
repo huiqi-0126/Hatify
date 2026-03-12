@@ -61,22 +61,24 @@ def score_article(title, description, content):
     current_default_date = datetime.now().strftime("%Y-%m-%d")
     
     prompt = f"""
-    You are a strict content auditor for "Hatify" (Custom Hats & Embroidery).
+    You are a strict content auditor and SEO copywriter for "Hatify" (Custom Hats & Embroidery).
     
-    Article Title: {title}
+    Current Article Title: {title}
     Article Content: {text_content[:800]}
     
     TASK:
     1. Score relevance (0-70) to HATS and EMBROIDERY.
     2. Extract or generate 2-4 tags.
     3. Extract a publication date if mentioned, otherwise return "{current_default_date}".
+    4. Generate a "catchy_title": A more attractive, click-worthy, and SEO-optimized version of the original title. It should be similar in meaning but much more engaging for a blog reader.
     
     Return JSON:
     {{
        "relevance_score": (int),
        "reasoning": "Explain score briefly",
        "tags": ["Tag1", "Tag2"],
-       "date": "YYYY-MM-DD"
+       "date": "YYYY-MM-DD",
+       "catchy_title": "The new optimized title"
     }}
     """
     
@@ -85,6 +87,7 @@ def score_article(title, description, content):
     scoring_type = "model"
     tags = ["Blog"]
     date = current_default_date
+    catchy_title = title
     
     try:
         response = model.generate_content(prompt)
@@ -96,6 +99,7 @@ def score_article(title, description, content):
         relevance_score = result.get('relevance_score', 0)
         reasoning = result.get('reasoning', "")
         tags = result.get('tags', ["Blog"])
+        catchy_title = result.get('catchy_title', title)
         
         # Date cleanup: if AI returns empty or invalid, use default
         extracted_date = result.get('date', "")
@@ -111,6 +115,7 @@ def score_article(title, description, content):
         reasoning = "Fallback scoring based on keywords."
         tags = ["Update"]
         date = current_default_date
+        catchy_title = title
 
     # 4. Apply Local Rule Penalty (-20 points)
     if penalty_reason:
@@ -118,7 +123,7 @@ def score_article(title, description, content):
         reasoning = f"Penalty (-20 pts) for patterns: {'; '.join(penalty_reason)}. " + reasoning
 
     total_score = length_score + relevance_score
-    return total_score, reasoning, scoring_type, tags, date
+    return total_score, reasoning, scoring_type, tags, date, catchy_title
 
 def process_scoring():
     if not DATA_FILE.exists():
@@ -137,9 +142,8 @@ def process_scoring():
     print(f"Incremental Scoring (Threshold: 80):")
     
     for art in articles:
-        # Rule: Only call AI if 'score' is missing. 
-        # scan_blog.py ensures that today's articles or new ones lack the 'score' field.
-        if "score" in art:
+        # Rule: Only call AI if 'score' is missing OR if we haven't generated a catchy title yet ('original_title' is missing).
+        if "score" in art and "original_title" in art:
             print(f"  Skipping AI for: {art.get('title', '')[:40]}... (Using existing score: {art['score']})")
             art["show"] = art["score"] > 80
             updated_articles.append(art)
@@ -147,16 +151,23 @@ def process_scoring():
 
         # Score new or refreshed articles
         print(f"  Scoring New/Refreshed: {art.get('title', '')[:40]}...")
-        score, reasoning, s_type, tags, date = score_article(art.get("title", ""), art.get("description", ""), art.get("content", ""))
+        score, reasoning, s_type, tags, date, catchy_title = score_article(art.get("title", ""), art.get("description", ""), art.get("content", ""))
+        
+        # Preserve original title if not already preserved
+        if "original_title" not in art:
+            art["original_title"] = art.get("title", "")
+            
         art["score"] = score
         art["reasoning"] = reasoning
         art["scoring_type"] = s_type
         art["tags"] = tags
         art["date"] = date
+        art["title"] = catchy_title # Replace with catchy title for display
         art["show"] = score > 80
         print(f"    Result: {score} ({s_type}) -> Show: {art['show']}")
+        print(f"    New Title: {catchy_title}")
         updated_articles.append(art)
-            
+             
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(updated_articles, f, indent=2, ensure_ascii=False)
     

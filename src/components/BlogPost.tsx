@@ -20,9 +20,21 @@ export default function BlogPost({ postId, onBack }: BlogPostProps) {
                 setShowScrollTop(false);
             }
         };
-        window.addEventListener("scroll", toggleVisibility);
-        return () => window.removeEventListener("scroll", toggleVisibility);
-    }, []);
+        if (post) {
+            document.title = `${post.title} | Hatify`;
+            // Update description meta tag
+            const metaDescription = document.querySelector('meta[name="description"]');
+            if (metaDescription) {
+                metaDescription.setAttribute('content', post.description);
+            }
+        }
+
+        return () => {
+            window.removeEventListener("scroll", toggleVisibility);
+            // Reset title when leaving
+            document.title = "Custom Hats & Personalized Caps | Leather Patch Hats & Custom Beanies | Hatify";
+        };
+    }, [post]);
 
     const scrollToTop = () => {
         window.scrollTo({

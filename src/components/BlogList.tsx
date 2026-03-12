@@ -114,9 +114,9 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
                     <div className="text-left">
-                        <h2 className="text-4xl font-bold tracking-tight text-[#18181B] sm:text-5xl">
+                        <h1 className="text-4xl font-bold tracking-tight text-[#18181B] sm:text-5xl">
                             {t('blog.title', 'Our Blog')}
-                        </h2>
+                        </h1>
                         <p className="mt-4 text-xl text-[#3F3F46]">
                             {t('blog.subtitle', 'Insights and guides on custom hats and apparel.')}
                         </p>
@@ -144,7 +144,7 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     <AnimatePresence mode="popLayout">
                         {(currentPosts as any[]).map((post, index) => (
-                            <motion.div
+                            <motion.a
                                 key={post.id}
                                 layout
                                 initial={{ opacity: 0, y: 30 }}
@@ -155,7 +155,11 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
                                     delay: (index % 6) * 0.05
                                 }}
                                 className="group bg-white rounded-[2.5rem] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.12)] transition-all duration-700 cursor-pointer border border-zinc-100 flex flex-col h-full hover:-translate-y-2"
-                                onClick={() => handleSelectPost(post.id)}
+                                href={`/blog/${post.id}`}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleSelectPost(post.id);
+                                }}
                             >
                                 <div className="aspect-[16/10] relative overflow-hidden bg-zinc-100">
                                     <img
@@ -217,7 +221,7 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
                                         </span>
                                     </div>
                                 </div>
-                            </motion.div>
+                            </motion.a>
                         ))}
                     </AnimatePresence>
                 </div>
