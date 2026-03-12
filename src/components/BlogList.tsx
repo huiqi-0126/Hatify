@@ -89,7 +89,7 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
     }, []);
 
     const getFallbackImage = (id: string | number) => {
-        console.log(`==========`, id);
+        console.log(`====22======`, id);
         if (galleryImages.length === 0) return `${import.meta.env.BASE_URL || '/'}gallery/23762624443471877.png`;
 
         // Ensure id is a string for hashing
@@ -99,13 +99,34 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
         return `${import.meta.env.BASE_URL || '/'}gallery/${galleryImages[index]}`;
     };
 
+    const normalizeDate = (d: any): string => {
+        if (!d || typeof d !== 'string') return '2000-01-01';
+        const parts = d.split('-');
+        if (parts.length === 3) {
+            const y = parts[0];
+            const m = parts[1].padStart(2, '0');
+            const day = parts[2].padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+        return d;
+    };
+
     const filteredPosts = [...blogData]
-        .sort((a, b) => {
-            const dateStrA = a.date || a.from_folder_date || '2000-01-01';
-            const dateStrB = b.date || b.from_folder_date || '2000-01-01';
-            return new Date(dateStrB).getTime() - new Date(dateStrA).getTime();
-        })
-        .filter((post: any) => post.show !== false);
+        .filter((post: any) => post.show !== false)
+        .sort((a: any, b: any) => {
+            const dateA = normalizeDate(a.from_folder_date || a.date);
+            const dateB = normalizeDate(b.from_folder_date || b.date);
+
+            // 1. Primary: Date Descending
+            if (dateB !== dateA) {
+                return dateB.localeCompare(dateA);
+            }
+
+            // 2. Secondary: ID Descending (for same-day posts)
+            const idA = parseInt(String(a.id || 0));
+            const idB = parseInt(String(b.id || 0));
+            return idB - idA;
+        });
     const hasMore = visibleCount < filteredPosts.length;
     const currentPosts = filteredPosts.slice(0, visibleCount);
 
@@ -203,7 +224,18 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
                                             </span>
                                         )}
                                         <span className="ml-auto text-zinc-400 text-[10px] font-bold tracking-widest uppercase">
-                                            {post.from_folder_date || post.date || '2026-03-09'}
+                                            {(() => {
+                                                const d = post.from_folder_date || post.date || '2026-03-09';
+                                                // Standardize YYYY-MM-DD for display if it's YYYY-M-D
+                                                const parts = d.split('-');
+                                                if (parts.length === 3) {
+                                                    const y = parts[0];
+                                                    const m = parts[1].padStart(2, '0');
+                                                    const day = parts[2].padStart(2, '0');
+                                                    return `${y}-${m}-${day}`;
+                                                }
+                                                return d;
+                                            })()}
                                         </span>
                                     </div>
                                     <h3 className="text-2xl font-bold text-zinc-900 mb-4 line-clamp-2 leading-tight group-hover:text-emerald-600 transition-colors duration-300">

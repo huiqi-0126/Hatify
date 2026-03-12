@@ -53,7 +53,7 @@ def score_article(title, description, content):
     model = genai.GenerativeModel(
         model_name="gemini-2.5-flash",
         generation_config={
-            "temperature": 0.1,
+            "temperature": 0.7, # Increased temperature for more creativity/variety
             "response_mime_type": "application/json",
         }
     )
@@ -61,16 +61,27 @@ def score_article(title, description, content):
     current_default_date = datetime.now().strftime("%Y-%m-%d")
     
     prompt = f"""
-    You are a strict content auditor and SEO copywriter for "Hatify" (Custom Hats & Embroidery).
+    You are a creative SEO copywriter and content strategist for "Hatify" (Custom Hats & Embroidery).
     
-    Current Article Title: {title}
-    Article Content: {text_content[:800]}
+    Original Title: {title}
+    Article Content: {text_content[:1000]}
     
     TASK:
     1. Score relevance (0-70) to HATS and EMBROIDERY.
     2. Extract or generate 2-4 tags.
     3. Extract a publication date if mentioned, otherwise return "{current_default_date}".
-    4. Generate a "catchy_title": A more attractive, click-worthy, and SEO-optimized version of the original title. It should be similar in meaning but much more engaging for a blog reader.
+    4. Generate a "catchy_title": Create a high-engagement, unique blog title.
+    
+    CRITICAL RULES FOR "catchy_title":
+    - DO NOT use overused AI patterns like "Unlock...", "Ultimate Guide...", "Elevate your...", "The Secret to...", or "Mastering...".
+    - BE DIVERSE: Use different styles like:
+        * Question-based: "Why are Trucker Hats making a comeback?"
+        * Listicle (only if content supports it): "5 Embroidery Mistakes that Ruin Custom Caps"
+        * Bold/Contrarian: "Stop buying cheap beanies—here's why quality matters"
+        * Tutorial-style: "From Sketch to Stitch: How we build custom patches"
+        * Storytelling: "How one custom hat helped a local team thrive"
+    - TONE: Match the article's energy (Exciting, Technical, Personal, or Humorous).
+    - Maximum 80 characters.
     
     Return JSON:
     {{
@@ -78,7 +89,7 @@ def score_article(title, description, content):
        "reasoning": "Explain score briefly",
        "tags": ["Tag1", "Tag2"],
        "date": "YYYY-MM-DD",
-       "catchy_title": "The new optimized title"
+       "catchy_title": "The unique, non-patterned title"
     }}
     """
     
@@ -92,8 +103,9 @@ def score_article(title, description, content):
     try:
         response = model.generate_content(prompt)
         raw_text = response.text.strip()
-        if raw_text.startswith("```"):
-            raw_text = re.sub(r'^```json\s*|\s*```$', '', raw_text, flags=re.MULTILINE)
+        # Handle cases where Gemini might return markdown or extra text
+        if "{" in raw_text:
+            raw_text = raw_text[raw_text.find("{"):raw_text.rfind("}")+1]
         
         result = json.loads(raw_text)
         relevance_score = result.get('relevance_score', 0)
@@ -101,7 +113,11 @@ def score_article(title, description, content):
         tags = result.get('tags', ["Blog"])
         catchy_title = result.get('catchy_title', title)
         
-        # Date cleanup: if AI returns empty or invalid, use default
+        # Ensure we don't end up with an empty catchy_title
+        if not catchy_title or len(catchy_title) < 5:
+            catchy_title = title
+            
+        # Date cleanup
         extracted_date = result.get('date', "")
         if not extracted_date or extracted_date == "N/A" or "1970" in extracted_date:
             date = current_default_date
@@ -142,9 +158,9 @@ def process_scoring():
     print(f"Incremental Scoring (Threshold: 80):")
     
     for art in articles:
-        # Rule: Only call AI if 'score' is missing OR if we haven't generated a catchy title yet ('original_title' is missing).
-        if "score" in art and "original_title" in art:
-            print(f"  Skipping AI for: {art.get('title', '')[:40]}... (Using existing score: {art['score']})")
+        # NEW RULE: If 'title_version' < 2, we re-run to apply the new creative diversity prompt.
+        if "score" in art and "original_title" in art and art.get("title_version") == 2:
+            print(f"  Skipping AI for: {art.get('title', '')[:40]}... (Already has v2 title)")
             art["show"] = art["score"] > 80
             updated_articles.append(art)
             continue
@@ -163,6 +179,7 @@ def process_scoring():
         art["tags"] = tags
         art["date"] = date
         art["title"] = catchy_title # Replace with catchy title for display
+        art["title_version"] = 2    # Mark as having the new creative title style
         art["show"] = score > 80
         print(f"    Result: {score} ({s_type}) -> Show: {art['show']}")
         print(f"    New Title: {catchy_title}")
