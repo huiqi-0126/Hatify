@@ -7,7 +7,10 @@ import { exec } from "child_process";
 import fs from "fs";
 import dotenv from "dotenv";
 
-dotenv.config();
+const envPath = (process.env.NODE_ENV !== "production" && fs.existsSync("env_dev")) ? "env_dev" : ".env";
+dotenv.config({ path: envPath });
+
+
 
 const db = new Database("inquiries.db");
 

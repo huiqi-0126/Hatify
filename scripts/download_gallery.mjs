@@ -10,6 +10,8 @@ const API_URL = 'https://ai.dreambrand.studio/api/global/images';
 const IMAGE_BASE_URL = 'https://image-cloud-1318759792.cos.na-siliconvalley.myqcloud.com/';
 const OUTPUT_DIR = path.join(__dirname, '../public/gallery');
 const METADATA_FILE = path.join(OUTPUT_DIR, 'images.json');
+const SRC_METADATA_FILE = path.join(__dirname, '../src/data/gallery.json');
+
 
 async function downloadImage(url, dest) {
     try {
@@ -61,7 +63,8 @@ async function main() {
 
         // Save metadata locally
         fs.writeFileSync(METADATA_FILE, JSON.stringify(data, null, 2));
-        console.log('Metadata saved to:', METADATA_FILE);
+        fs.writeFileSync(SRC_METADATA_FILE, JSON.stringify(data, null, 2));
+        console.log('Metadata saved to:', METADATA_FILE, 'and', SRC_METADATA_FILE);
         console.log('All images downloaded successfully!');
 
     } catch (error) {

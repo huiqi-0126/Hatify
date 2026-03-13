@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import blogData from "../data/blog.json";
+import galleryData from "../data/gallery.json";
+
 
 interface BlogListProps {
     onSelectPost: (id: string) => void;
@@ -70,23 +72,10 @@ export default function BlogList({ onSelectPost }: BlogListProps) {
         }
     };
 
-    const [galleryImages, setGalleryImages] = useState<string[]>([]);
+    const [galleryImages] = useState<string[]>(() => 
+        galleryData.data.list.map((item: any) => item.name).slice(0, 50)
+    );
 
-    useEffect(() => {
-        const loadGallery = async () => {
-            try {
-                const base = import.meta.env.BASE_URL || '/';
-                const res = await fetch(`${base}gallery/images.json`);
-                const data = await res.json();
-                if (data?.data?.list) {
-                    setGalleryImages(data.data.list.map((item: any) => item.name));
-                }
-            } catch (err) {
-                console.error("Failed to load gallery for fallback images:", err);
-            }
-        };
-        loadGallery();
-    }, []);
 
     const getFallbackImage = (id: string | number) => {
         console.log(`====22======`, id);

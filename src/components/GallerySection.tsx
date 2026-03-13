@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import galleryData from '../data/gallery.json';
+
 
 
 interface ImageItem {
@@ -19,25 +21,14 @@ export default function GallerySection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        // Fetch from local metadata file instead of external API proxy
-        const res = await fetch('/gallery/images.json');
-        const data = await res.json();
-        if (data?.data?.list) {
-          // Shuffle the list for random display on refresh
-          const shuffled = [...data.data.list].sort(() => Math.random() - 0.5);
-          setImages(shuffled.slice(0, 24)); // Display a subset of 24 images
-        }
-      } catch (error) {
-        console.error('Failed to fetch images:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchImages();
+    if (galleryData?.data?.list) {
+      // Shuffle the list for random display on refresh
+      const shuffled = [...galleryData.data.list].sort(() => Math.random() - 0.5);
+      setImages(shuffled.slice(0, 24)); // Display a subset of 24 images
+      setLoading(false);
+    }
   }, []);
+
 
   // Split images into columns for masonry layout
   const columns = 4;
