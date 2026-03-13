@@ -7,8 +7,9 @@ import Features from "./components/Features";
 import FAQ from "./components/FAQ";
 import Footer from "./components/Footer";
 import ContactList from "./components/ContactList";
+import QAAgent from "./components/QAAgent";
 
-export type ViewState = "home" | "contact-list" | "blog" | "blog-post";
+export type ViewState = "home" | "contact-list" | "blog" | "blog-post" | "qa-agent";
 
 import BlogList from "./components/BlogList";
 import BlogPost from "./components/BlogPost";
@@ -26,6 +27,8 @@ export default function App() {
       setView("contact-list");
     } else if (path.endsWith(base + '/Blog') || path.endsWith(base + '/Blog/')) {
       setView("blog");
+    } else if (path.endsWith(base + '/qa-agent') || path.endsWith(base + '/qa-agent/')) {
+      setView("qa-agent");
     } else if (path.includes('/blog/')) {
       const parts = path.split('/');
       const id = parts[parts.length - 1];
@@ -71,6 +74,9 @@ export default function App() {
         )}
         {view === "blog-post" && selectedPostId && (
           <BlogPost postId={selectedPostId} onBack={handleBackToBlog} />
+        )}
+        {view === "qa-agent" && (
+          <QAAgent onBack={() => setView("home")} />
         )}
       </main>
       <Footer setView={setView} />

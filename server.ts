@@ -186,6 +186,268 @@ async function startServer() {
     });
   });
 
+  // ============================================================
+  // Q&A Agent APIs
+  // ============================================================
+  const qaDb = new Database("knowledge.db");
+
+  // Initialize tables if they don't exist yet
+  qaDb.exec(`
+    CREATE TABLE IF NOT EXISTS questions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      platform TEXT NOT NULL,
+      url TEXT UNIQUE,
+      title TEXT NOT NULL,
+      description TEXT,
+      asked_at TEXT,
+      answer_count INTEGER DEFAULT 0,
+      relevance_score REAL DEFAULT 0,
+      matched_tags TEXT,
+      status TEXT DEFAULT 'new',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS answers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      question_id INTEGER REFERENCES questions(id),
+      content TEXT NOT NULL,
+      content_en TEXT,
+      sources TEXT,
+      language TEXT DEFAULT 'zh',
+      status TEXT DEFAULT 'draft',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
+  // GET /api/qa/questions — List questions with optional filters
+  app.get("/api/qa/questions", (req, res) => {
+    try {
+      const { status, platform, limit = "50", offset = "0" } = req.query;
+      let sql = "SELECT * FROM questions";
+      const conditions: string[] = [];
+      const params: any[] = [];
+
+      if (status && status !== "all") {
+        conditions.push("status = ?");
+        params.push(status);
+      }
+      if (platform && platform !== "all") {
+        conditions.push("platform = ?");
+        params.push(platform);
+      }
+      if (conditions.length > 0) {
+        sql += " WHERE " + conditions.join(" AND ");
+      }
+      sql += " ORDER BY relevance_score DESC, created_at DESC";
+      sql += ` LIMIT ? OFFSET ?`;
+      params.push(Number(limit), Number(offset));
+
+      const questions = qaDb.prepare(sql).all(...params);
+
+      // Get total count
+      let countSql = "SELECT COUNT(*) as total FROM questions";
+      if (conditions.length > 0) {
+        countSql += " WHERE " + conditions.join(" AND ");
+      }
+      const total = qaDb.prepare(countSql).get(...params.slice(0, -2)) as any;
+
+      res.json({
+        questions: questions.map((q: any) => ({
+          ...q,
+          matched_tags: q.matched_tags ? JSON.parse(q.matched_tags) : [],
+        })),
+        total: total?.total || 0,
+      });
+    } catch (error) {
+      console.error("[QA] Questions error:", error);
+      res.status(500).json({ error: "Failed to fetch questions" });
+    }
+  });
+
+  // PATCH /api/qa/questions/:id — Update question status
+  app.patch("/api/qa/questions/:id", (req, res) => {
+    try {
+      const { status } = req.body;
+      qaDb.prepare("UPDATE questions SET status = ? WHERE id = ?").run(status, req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("[QA] Update question error:", error);
+      res.status(500).json({ error: "Failed to update question" });
+    }
+  });
+
+  // DELETE /api/qa/questions/:id — Delete question and its answers
+  app.delete("/api/qa/questions/:id", (req, res) => {
+    try {
+      qaDb.prepare("DELETE FROM answers WHERE question_id = ?").run(req.params.id);
+      qaDb.prepare("DELETE FROM questions WHERE id = ?").run(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("[QA] Delete question error:", error);
+      res.status(500).json({ error: "Failed to delete question" });
+    }
+  });
+
+  // GET /api/qa/answers — List answers with optional filters
+  app.get("/api/qa/answers", (req, res) => {
+    try {
+      const { question_id, status } = req.query;
+      let sql = `SELECT a.*, q.title as question_title, q.platform, q.url as question_url
+                 FROM answers a JOIN questions q ON a.question_id = q.id`;
+      const conditions: string[] = [];
+      const params: any[] = [];
+
+      if (question_id) {
+        conditions.push("a.question_id = ?");
+        params.push(Number(question_id));
+      }
+      if (status && status !== "all") {
+        conditions.push("a.status = ?");
+        params.push(status);
+      }
+      if (conditions.length > 0) {
+        sql += " WHERE " + conditions.join(" AND ");
+      }
+      sql += " ORDER BY a.created_at DESC";
+
+      const answers = qaDb.prepare(sql).all(...params);
+      res.json({
+        answers: answers.map((a: any) => ({
+          ...a,
+          sources: a.sources ? JSON.parse(a.sources) : [],
+        })),
+      });
+    } catch (error) {
+      console.error("[QA] Answers error:", error);
+      res.status(500).json({ error: "Failed to fetch answers" });
+    }
+  });
+
+  // PATCH /api/qa/answers/:id — Update answer content/status
+  app.patch("/api/qa/answers/:id", (req, res) => {
+    try {
+      const { content, status } = req.body;
+      if (content !== undefined) {
+        qaDb.prepare("UPDATE answers SET content = ? WHERE id = ?").run(content, req.params.id);
+      }
+      if (status !== undefined) {
+        qaDb.prepare("UPDATE answers SET status = ? WHERE id = ?").run(status, req.params.id);
+        // If marking as answered, update question status too
+        if (status === "approved") {
+          const answer = qaDb.prepare("SELECT question_id FROM answers WHERE id = ?").get(req.params.id) as any;
+          if (answer) {
+            qaDb.prepare("UPDATE questions SET status = 'answered' WHERE id = ?").run(answer.question_id);
+          }
+        }
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error("[QA] Update answer error:", error);
+      res.status(500).json({ error: "Failed to update answer" });
+    }
+  });
+
+  // POST /api/qa/generate — Generate answer for a specific question
+  app.post("/api/qa/generate", (req, res) => {
+    const { question_id } = req.body;
+    console.log(`[QA] Generating answer for question ${question_id}...`);
+    exec(`python scripts/generate_answers.py --question-id ${question_id}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`[QA] Generate error: ${error}`);
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      console.log(`[QA] Generate output: ${stdout}`);
+      res.json({ success: true, message: stdout });
+    });
+  });
+
+  // POST /api/qa/collect — Manually trigger question collection
+  app.post("/api/qa/collect", (req, res) => {
+    const platform = req.body.platform || "all";
+    console.log(`[QA] Starting manual collection (${platform})...`);
+    exec(`python scripts/collect_questions.py --platform ${platform}`, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`[QA] Collection error: ${error}`);
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      console.log(`[QA] Collection output: ${stdout}`);
+      res.json({ success: true, message: stdout });
+    });
+  });
+
+  // POST /api/qa/build-kb — Rebuild knowledge base
+  app.post("/api/qa/build-kb", (req, res) => {
+    console.log("[QA] Rebuilding knowledge base...");
+    exec("python scripts/build_knowledge_base.py", (error, stdout, stderr) => {
+      if (error) {
+        console.error(`[QA] KB build error: ${error}`);
+        return res.status(500).json({ success: false, error: error.message });
+      }
+      console.log(`[QA] KB build output: ${stdout}`);
+      res.json({ success: true, message: stdout });
+    });
+  });
+
+  // GET /api/qa/stats — Dashboard stats
+  app.get("/api/qa/stats", (req, res) => {
+    try {
+      const totalQuestions = (qaDb.prepare("SELECT COUNT(*) as c FROM questions").get() as any)?.c || 0;
+      const newQuestions = (qaDb.prepare("SELECT COUNT(*) as c FROM questions WHERE status = 'new'").get() as any)?.c || 0;
+      const draftAnswers = (qaDb.prepare("SELECT COUNT(*) as c FROM answers WHERE status = 'draft'").get() as any)?.c || 0;
+      const approvedAnswers = (qaDb.prepare("SELECT COUNT(*) as c FROM answers WHERE status = 'approved'").get() as any)?.c || 0;
+      const zhihuCount = (qaDb.prepare("SELECT COUNT(*) as c FROM questions WHERE platform = 'zhihu'").get() as any)?.c || 0;
+      const quoraCount = (qaDb.prepare("SELECT COUNT(*) as c FROM questions WHERE platform = 'quora'").get() as any)?.c || 0;
+      const redditCount = (qaDb.prepare("SELECT COUNT(*) as c FROM questions WHERE platform = 'reddit'").get() as any)?.c || 0;
+
+      let kbChunks = 0;
+      try {
+        kbChunks = (qaDb.prepare("SELECT COUNT(*) as c FROM chunks").get() as any)?.c || 0;
+      } catch { /* chunks table may not exist yet */ }
+
+      res.json({
+        totalQuestions,
+        newQuestions,
+        draftAnswers,
+        approvedAnswers,
+        zhihuCount,
+        quoraCount,
+        redditCount,
+        kbChunks,
+      });
+    } catch (error) {
+      console.error("[QA] Stats error:", error);
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
+  });
+
+  // Daily cron job: 23:00 — Collect questions + generate answers
+  const scheduleDaily = () => {
+    const now = new Date();
+    const target = new Date();
+    target.setHours(23, 0, 0, 0);
+    if (target <= now) {
+      target.setDate(target.getDate() + 1);
+    }
+    const delay = target.getTime() - now.getTime();
+    console.log(`[QA Cron] Next run scheduled at ${target.toLocaleString()} (in ${Math.round(delay / 60000)} min)`);
+
+    setTimeout(() => {
+      console.log("[QA Cron] Starting daily collection + generation...");
+      exec(
+        "python scripts/collect_questions.py --platform all && python scripts/generate_answers.py --limit 10",
+        (error, stdout, stderr) => {
+          if (error) {
+            console.error(`[QA Cron] Error: ${error.message}`);
+          } else {
+            console.log(`[QA Cron] Complete: ${stdout}`);
+          }
+          // Schedule next run
+          scheduleDaily();
+        }
+      );
+    }, delay);
+  };
+  scheduleDaily();
+
   // Handle blog pages specifically for SEO injection (Dev + Prod)
   app.get("/blog/:id", async (req, res, next) => {
     const postId = req.params.id;
